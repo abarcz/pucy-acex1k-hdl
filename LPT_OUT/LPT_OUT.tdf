@@ -1,0 +1,136 @@
+TITLE "LPT_OUT modu³ obs³ugi wyjœciowego ³¹cza równoleg³ego";
+%
+Modu³ pod³¹czony do uk³adu SML: 235_DB25F,
+odbieraj¹cy z szyny danych 8-bitow¹ liczbê U2
+i wysy³aj¹cy j¹ w postaci ZDDD przez port LPT do drukarki.
+(Z - znak, D - cyfra dziesiêtna)
+%
+
+CONSTANT strobe_time = 2;	% 0,5us dla STROBE 				%
+% 0,5u / 0,05u = 10, 40 dla bezpieczeñstwa					%
+
+CONSTANT dev_addr = H"10";	% adres urzadzenia w IO			%
+
+SUBDESIGN LPT_OUT
+(
+	GEN 		: input;	% zegar 20MHz					%
+	RESET		: input;	% sygnal resetu mikrokontr.		%
+	
+	% sygnaly szyny wewnetrznej mikrokontrolera				%
+	A[7..0]		: input;	% linie adresowe szyny			%
+	D[7..0]		: bidir;	% linie danych szyny			%
+	IORQ		: input;	
+	RD			: input;
+	WR			: input;
+	WAIT		: output;
+	
+	% sygnaly debug %
+	V_BPRINT	:output;
+	V_APRINT	:output;
+	V_SB[1..0] 	:output;
+	V_SA[1..0]	:output;
+	V_CSTIME[5..0] :output;
+	
+	% sygnaly do komunikacji z laczem LPT					%
+	LCTRL[7..0]	: output;	% SV2: nSI,nI,nAF,nS do LPT		%
+	LSTAT[7..0]	: input;	% SV3: BS,PE,nF,S z LPT			%
+	LDATA[7..0]	: output;	% SV5: dane do LPT				%
+	
+	
+)
+VARIABLE
+	BPRINT		: NODE;		% komenda z szyny: drukuj		%
+	APRINT		: NODE;		% komenda od AUT_BUS: drukuj	%
+	WAIT_O		: NODE;		% wyjscie WAIT na szyne			%
+	DIN[7..0]	: NODE;		% szyna danych wejsciowych		%
+	DOUT[7..0]	: NODE; 	% szyna danych wyjsciowych		%
+	PRNT_OK		: NODE;		% czy drukarka ok?(!PE,nF,S)	%
+	BUSY		: NODE;		% Busy z SV3					%
+	STROBE		: NODE;		% sygnal STROBE do SV2			%
+	TRI_DI[7..0]: TRI;		% bufor trojstanowy WE szyny D[]%
+	TRI_DO[7..0]: TRI;		% bufor trojstanowy WY szyny D[]%
+	CSTIME[5..0]: DFF;		% zlicza czas strobe			%
+	
+	% automat obslugujacy drukowanie						%
+	AUT_PRINT	: machine of bits (QP[1..0])
+					with states (SP0=B"00", SP1=B"01",
+									SP2=B"10", SP3=B"11"); 		
+									
+	% automat obslugujacy komunikacje z szyna				%
+	AUT_BUS 	: machine of bits (QB[1..0])
+					with states (SB0=B"00", SB1=B"01",
+									SB2=B"10", SB3=B"11"); 			
+BEGIN
+	% DEBUG %
+	V_BPRINT = BPRINT;
+	V_APRINT = APRINT;
+	V_CSTIME[] = CSTIME[];
+	
+	CSTIME[].clk	= GEN;
+	CSTIME[].clrn 	= RESET;
+	AUT_PRINT.clk 	= GEN;
+	AUT_PRINT.reset = !RESET;
+	AUT_BUS.clk 	= GEN;
+	AUT_BUS.reset 	= !RESET;
+	TRI_DO[].oe		= GND;		% TODO: odczyt z LCTRL		%
+	TRI_DO[].in		= DOUT[];
+	
+	BUSY 			= LSTAT[3];
+	
+	% !PError & nFault & Select								%
+	PRNT_OK			= !LSTAT[5] & LSTAT[7] & LSTAT[6];
+	
+	% nSelectIn=0,nInit=1,nAutoFd=0							%
+	LCTRL[] 		= (STROBE,0,1,0,1,1,1,1);
+	
+	% rozkaz wyslania danych do LPT					  		%
+	if (A[]==dev_addr) & (IORQ==GND) & (WR==GND)
+		then BPRINT = VCC;
+		else BPRINT = GND;	end if;
+		
+	% wczytanie danych z szyny D[] 							%	
+	TRI_DI[].oe 	= BPRINT;
+	TRI_DI[].in 	= D[];
+	DIN[] 			= TRI_DI[];
+	% wystawienie danych na port LPT						%
+	LDATA[] 		= DIN[];
+	
+	% wystawienie sygnalu WAIT na szyne						%
+	WAIT 			= TRI(WAIT_O, BPRINT);	% (in, oe) %
+	
+	% automat obslugujacy komunikacje z szyna				%
+	case AUT_BUS is
+		% oczekiwanie na dane z szyny	%
+		when SB0 => if (BPRINT==VCC)then	WAIT_O=VCC; APRINT=VCC; AUT_BUS=SB1;V_SB[]=B"01";
+						else				WAIT_O=GND; APRINT=GND; AUT_BUS=SB0;V_SB[]=B"00"; end if;
+		% oczekiwanie na pojawienie sie !STROBE 
+			- oznacza to, ze AUT_PRINT ruszyl, nie przeoczymy
+			tego sygnalu, bo trwa >1 takt zegara			%
+		when SB1 => if (STROBE==GND)then	WAIT_O=VCC; APRINT=GND; AUT_BUS=SB2;V_SB[]=B"10";
+						else				WAIT_O=VCC;	APRINT=VCC;	AUT_BUS=SB1;V_SB[]=B"01"; end if;
+		% oczekiwanie na koniec wydruku						%
+		when SB2 => if (AUT_PRINT==SP0)then WAIT_O=GND; APRINT=GND; AUT_BUS=SB3;V_SB[]=B"11";
+						else				WAIT_O=VCC;	APRINT=GND; AUT_BUS=SB2;V_SB[]=B"10"; end if;
+		% oczekiwanie na wycofanie sie z szyny pol. druku	%
+		when SB3 => if (BPRINT==GND)then	WAIT_O=GND; APRINT=GND; AUT_BUS=SB0;V_SB[]=B"00";
+						else				WAIT_O=GND;	APRINT=GND;	AUT_BUS=SB3;V_SB[]=B"11"; end if;
+	end case;
+	
+	% automat obslugujacy drukowanie						%
+	case AUT_PRINT is
+		% oczekiwanie na polecenie druku					%
+		when SP0 => if (APRINT==VCC)then	STROBE=VCC; AUT_PRINT=SP1;V_SA[]=B"01";
+						else				STROBE=VCC; AUT_PRINT=SP0;V_SA[]=B"00"; end if;
+		% sprawdzenie stanu linii BUSY 						%
+		when SP1 => if (BUSY==GND) 	then	STROBE=GND; AUT_PRINT=SP2;V_SA[]=B"10";
+						else				STROBE=VCC; AUT_PRINT=SP1;V_SA[]=B"01"; end if;
+		% wystawienie !STROBE na czas strobe_time			%
+		when SP2 => if (CSTIME[]==strobe_time)
+						then 				STROBE=VCC; AUT_PRINT=SP3;V_SA[]=B"11";
+						else CSTIME[]=CSTIME[]+1;STROBE=GND;AUT_PRINT=SP2;V_SA[]=B"10";end if;
+		% zaczekanie na BUSY = L							%
+		when SP3 => if (BUSY==GND) 	then	STROBE=VCC; AUT_PRINT=SP0;V_SA[]=B"00";
+						else				STROBE=VCC; AUT_PRINT=SP3;V_SA[]=B"11"; end if;
+	end case;
+	
+END;
