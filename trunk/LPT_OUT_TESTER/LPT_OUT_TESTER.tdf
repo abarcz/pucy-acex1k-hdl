@@ -1,0 +1,54 @@
+TITLE "LPT_OUT modu³ testujacy";
+%
+%
+INCLUDE "LPT_OUT.inc";
+INCLUDE "lpm_bustri.inc";
+
+CONSTANT out_addr = H"10";	% adres urzadzenia w IO			%
+
+SUBDESIGN LPT_OUT_TESTER
+(
+	GEN 		: input;	% zegar 20MHz					%
+	RESET		: input;	% sygnal resetu mikrokontr.		%
+	D[7..0]		: bidir;
+	
+	% sygnaly do komunikacji z laczem LPT					%
+	LCTRL[7..0]	: output;	% SV2: nSI,nI,nAF,nS do LPT		%
+	LSTAT[7..0]	: input;	% SV3: BS,PE,nF,S z LPT			%
+	LDATA[7..0]	: output;	% SV5: dane do LPT				%
+
+	% sygnaly debug %
+	V_D[7..0]	: output;
+	V_A[7..0]	: output;
+	
+)
+VARIABLE
+	% sygnaly szyny wewnetrznej mikrokontrolera				%
+	A[7..0]		: NODE;		% linie adresowe szyny			%
+	%D[7..0]		: NODE;%		% linie danych szyny			%
+	IORQ		: NODE;	
+	WR			: NODE;
+	LPT			: LPT_OUT;	% testowane urzadzenie			%
+	
+BEGIN
+	%debug %
+	V_D[]		= D[];
+	V_A[]		= A[];
+	
+	LPT.GEN		= GEN;
+	LPT.RESET	= RESET;
+	LPT.A[]		= A[];
+	LPT.IORQ	= IORQ;
+	LPT.WR		= WR;
+	LCTRL[]		= LPT.LCTRL[];
+	LPT.LSTAT[]	= LSTAT[];
+	LDATA[]		= LPT.LDATA[];
+		
+	D[]			= LPT.D[];
+	
+	A[]			= out_addr;
+	IORQ		= GND;
+	WR			= GND;
+	%D[]			= H"61"; %% a %
+	
+END;
