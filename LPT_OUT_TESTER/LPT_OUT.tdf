@@ -6,7 +6,7 @@ i wysy³aj¹cy j¹ w postaci ZDDD przez port LPT do drukarki.
 (Z - znak, D - cyfra dziesiêtna)
 %
 
-CONSTANT strobe_time = 2;	% 0,5us dla STROBE 				%
+CONSTANT strobe_time = 62;	% 0,5us dla STROBE 				%
 % 0,5u / 0,05u = 10, 40 dla bezpieczeñstwa					%
 
 CONSTANT dev_addr = H"10";	% adres urzadzenia w IO			%
