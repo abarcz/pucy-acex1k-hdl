@@ -13,13 +13,20 @@ SUBDESIGN LPT_OUT_TESTER
 	D[7..0]		: bidir;
 	
 	% sygnaly do komunikacji z laczem LPT					%
-	LCTRL[7..0]	: output;	% SV2: nSI,nI,nAF,nS do LPT		%
-	LSTAT[7..0]	: input;	% SV3: BS,PE,nF,S z LPT			%
-	LDATA[7..0]	: output;	% SV5: dane do LPT				%
+	%LCTRL[7..0]	: output;%	% SV2: nSI,nI,nAF,nS do LPT		%
+	%LSTAT[7..0]	: input;	%% SV3: BS,PE,nF,S z LPT			%
+	%LDATA[7..0]	: output;	%% SV5: dane do LPT				%
 
 	% sygnaly debug %
 	V_D[7..0]	: output;
 	V_A[7..0]	: output;
+	
+	% sygnaly WE / WY										%
+	L_A[7..0]   : output;
+	L_B[7..0]	: output;
+	P_1[7..0]	: output;
+	P_2[7..0]	: input;
+	P_3[7..0]	: output;
 	
 )
 VARIABLE
@@ -35,20 +42,29 @@ BEGIN
 	V_D[]		= D[];
 	V_A[]		= A[];
 	
+	%L_A[]		= (0,0,0,0,0,0,0,0);%
+	L_A[]		= LPT.LCTRL[];
+	L_B[]		= P_2[];
+	%L_B[]		= (1,1,0,1,0,1,0,1);%
+	P_1[]		= LPT.LDATA[];
+	LPT.LSTAT[]	= P_2[];
+	P_3[]		= LPT.LCTRL[];
+	%P_3[]		= (1,0,1,0,1,1,1,1);%
+	
 	LPT.GEN		= GEN;
 	LPT.RESET	= RESET;
 	LPT.A[]		= A[];
 	LPT.IORQ	= IORQ;
 	LPT.WR		= WR;
-	LCTRL[]		= LPT.LCTRL[];
+	%LCTRL[]		= LPT.LCTRL[];
 	LPT.LSTAT[]	= LSTAT[];
-	LDATA[]		= LPT.LDATA[];
+	LDATA[]		= LPT.LDATA[];%
 		
 	D[]			= LPT.D[];
 	
 	A[]			= out_addr;
 	IORQ		= GND;
 	WR			= GND;
-	%D[]			= H"61"; %% a %
+	%D[]			= H"61";% % a %
 	
 END;
