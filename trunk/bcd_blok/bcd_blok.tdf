@@ -1,0 +1,15 @@
+TITLE "BCD_BLOK";
+SUBDESIGN bcd_blok
+(
+	WA[3..0],WB[3..0],CI : input;
+	WY[3..0],CO : output;
+)
+VARIABLE
+	SUMA[4..0],WYNIK[4..0] : NODE;
+BEGIN
+	SUMA[] = (0,WA[])+(0,WB[])+(0,0,0,0,CI);
+	if SUMA[]>9 then WYNIK[]=SUMA[]+6; % korekcja wyniku %
+	else WYNIK[]=SUMA[]; % wynik bez korekcji %
+	end if;
+	CO=WYNIK[4]; WY[]=WYNIK[3..0];
+END;

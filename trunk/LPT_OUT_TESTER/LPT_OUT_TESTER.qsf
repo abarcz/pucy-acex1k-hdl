@@ -99,3 +99,4 @@ set_location_assignment PIN_64 -to P_2[3]
 set_location_assignment PIN_62 -to P_2[2]
 set_location_assignment PIN_60 -to P_2[1]
 set_location_assignment PIN_59 -to P_2[0]
+set_global_assignment -name MISC_FILE "E:/various/_PW/PUCY/Projekt_svn/LPT_OUT_TESTER/LPT_OUT_TESTER.dpf"
