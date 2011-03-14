@@ -1,0 +1,15 @@
+TITLE "Sumator 2-cyfrowych liczb dziesiêtnych";
+INCLUDE "bcd_blok.inc";
+SUBDESIGN bcd_sumator
+(
+	XX[7..0],YY[7..0],CIN : input;
+	ZZ[7..0],NAD : output;
+)
+VARIABLE
+	CYF_A,CYF_B : BCD_BLOK;
+BEGIN
+	CYF_A.WA[]=XX[ 3.. 0]; CYF_A.WB[]=YY[ 3.. 0]; CYF_A.CI=CIN;
+	CYF_B.WA[]=XX[ 7.. 4]; CYF_B.WB[]=YY[ 7.. 4]; CYF_B.CI=CYF_A.CO;
+	ZZ[]=(CYF_B.WY[],CYF_A.WY[]);
+	NAD=CYF_B.CO;
+END;
