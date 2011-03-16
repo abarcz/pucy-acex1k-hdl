@@ -45,5 +45,8 @@ set_global_assignment -name LAST_QUARTUS_VERSION "9.0 SP2"
 set_global_assignment -name USE_GENERATED_PHYSICAL_CONSTRAINTS OFF -section_id eda_blast_fpga
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name AHDL_FILE bcd_blok.tdf
+set_global_assignment -name AHDL_FILE bcd_sumator.tdf
+set_global_assignment -name AHDL_FILE U2_TO_ASCII.tdf
 set_global_assignment -name AHDL_FILE LPT_OUT.tdf
 set_global_assignment -name VECTOR_WAVEFORM_FILE LPT_OUT.vwf

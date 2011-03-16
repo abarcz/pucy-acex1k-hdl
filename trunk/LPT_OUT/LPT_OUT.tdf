@@ -5,6 +5,7 @@ odbieraj¹cy z szyny danych 8-bitow¹ liczbê U2
 i wysy³aj¹cy j¹ w postaci ZDDD przez port LPT do drukarki.
 (Z - znak, D - cyfra dziesiêtna)
 %
+INCLUDE "U2_TO_ASCII.inc";
 
 CONSTANT strobe_time = 2;	% 0,5us dla STROBE 				%
 % 0,5u / 0,05u = 10, 40 dla bezpieczeñstwa					%
@@ -27,9 +28,14 @@ SUBDESIGN LPT_OUT
 	% sygnaly debug %
 	V_BPRINT	:output;
 	V_APRINT	:output;
-	V_SB[1..0] 	:output;
+	V_SB[3..0] 	:output;
 	V_SA[1..0]	:output;
 	V_CSTIME[5..0] :output;
+	V_Z[7..0]	:output;
+	V_D2[7..0]	:output;
+	V_D1[7..0]	:output;
+	V_D0[7..0]	:output;
+	
 	
 	% sygnaly do komunikacji z laczem LPT					%
 	LCTRL[7..0]	: output;	% SV2: nSI,nI,nAF,nS do LPT		%
@@ -50,21 +56,44 @@ VARIABLE
 	TRI_DI[7..0]: TRI;		% bufor trojstanowy WE szyny D[]%
 	TRI_DO[7..0]: TRI;		% bufor trojstanowy WY szyny D[]%
 	CSTIME[5..0]: DFF;		% zlicza czas strobe			%
+	Z[7..0]		: NODE;		% kod ASCII znaku: 2D='-',2B='+'%
+	D2[7..0]	: NODE;		% kod ASCII cyfry: 30..39		%
+	D1[7..0]	: NODE;
+	D0[7..0]	: NODE;
+	U2A			: U2_TO_ASCII;	% konwerter U2->ZDDD		%
 	
-	% automat obslugujacy drukowanie						%
+	% automat obslugujacy drukowanie znaku					%
 	AUT_PRINT	: machine of bits (QP[1..0])
 					with states (SP0=B"00", SP1=B"01",
 									SP2=B"10", SP3=B"11"); 		
 									
 	% automat obslugujacy komunikacje z szyna				%
-	AUT_BUS 	: machine of bits (QB[1..0])
+	%AUT_BUS 	: machine of bits (QB[1..0])
 					with states (SB0=B"00", SB1=B"01",
-									SB2=B"10", SB3=B"11"); 			
+									SB2=B"10", SB3=B"11"); 	%
+									
+	% automat obslugujacy komunikacje z szyna
+			i sterujacy logika wydruku						%
+	AUT_BUS 	: machine of bits (QB[3..0])
+					with states (IDL=B"0000", 
+									ZA=B"0001",
+									ZB=B"0010", 
+									D2A=B"0011",
+									D2B=B"0100",
+									D1A=B"0101", 
+									D1B=B"0110",
+									D0A=B"0111",
+									D0B=B"1000",
+									WBU=B"1001");	
 BEGIN
 	% DEBUG %
 	V_BPRINT = BPRINT;
 	V_APRINT = APRINT;
 	V_CSTIME[] = CSTIME[];
+	V_Z[] = Z[];
+	V_D2[] = D2[];
+	V_D1[] = D1[];
+	V_D0[] = D0[];
 	
 	CSTIME[].clk	= GEN;
 	CSTIME[].clrn 	= RESET;
@@ -74,6 +103,11 @@ BEGIN
 	AUT_BUS.reset 	= !RESET;
 	TRI_DO[].oe		= GND;		% TODO: odczyt z LCTRL		%
 	TRI_DO[].in		= DOUT[];
+	U2A.U2I[] 		= DIN[];
+	Z[]				= U2A.Z[];
+	D2[]			= U2A.D2[];
+	D1[]			= U2A.D1[];
+	D0[]			= U2A.D0[];
 	
 	BUSY 			= LSTAT[3];
 	
@@ -83,7 +117,7 @@ BEGIN
 	% nSelectIn=0,nInit=1,nAutoFd=0							%
 	LCTRL[] 		= (STROBE,0,1,0,1,1,1,1);
 	
-	% rozkaz wyslania danych do LPT					  		%
+	% zdekodowanie rozkazu wyslania danych do LPT			%
 	if (A[]==dev_addr) & (IORQ==GND) & (WR==GND)
 		then BPRINT = VCC;
 		else BPRINT = GND;	end if;
@@ -92,28 +126,45 @@ BEGIN
 	TRI_DI[].oe 	= BPRINT;
 	TRI_DI[].in 	= D[];
 	DIN[] 			= TRI_DI[];
-	% wystawienie danych na port LPT						%
-	LDATA[] 		= DIN[];
 	
 	% wystawienie sygnalu WAIT na szyne						%
 	WAIT 			= TRI(WAIT_O, BPRINT);	% (in, oe) %
 	
-	% automat obslugujacy komunikacje z szyna				%
+	% automat obslugujacy komunikacje z szyna
+			i sterujacy logika wydruku						%
 	case AUT_BUS is
 		% oczekiwanie na dane z szyny	%
-		when SB0 => if (BPRINT==VCC)then	WAIT_O=VCC; APRINT=VCC; AUT_BUS=SB1;V_SB[]=B"01";
-						else				WAIT_O=GND; APRINT=GND; AUT_BUS=SB0;V_SB[]=B"00"; end if;
-		% oczekiwanie na pojawienie sie !STROBE 
+		when IDL => if (BPRINT==VCC)then	WAIT_O=VCC; APRINT=VCC; LDATA[]=Z[]; AUT_BUS=ZA; V_SB[]=B"0001";
+						else				WAIT_O=GND; APRINT=GND; LDATA[]=Z[]; AUT_BUS=IDL;V_SB[]=B"0000"; end if;
+		% oczekiwanie na pojawienie sie !STROBE dla Z
 			- oznacza to, ze AUT_PRINT ruszyl, nie przeoczymy
 			tego sygnalu, bo trwa >1 takt zegara			%
-		when SB1 => if (STROBE==GND)then	WAIT_O=VCC; APRINT=GND; AUT_BUS=SB2;V_SB[]=B"10";
-						else				WAIT_O=VCC;	APRINT=VCC;	AUT_BUS=SB1;V_SB[]=B"01"; end if;
-		% oczekiwanie na koniec wydruku						%
-		when SB2 => if (AUT_PRINT==SP0)then WAIT_O=GND; APRINT=GND; AUT_BUS=SB3;V_SB[]=B"11";
-						else				WAIT_O=VCC;	APRINT=GND; AUT_BUS=SB2;V_SB[]=B"10"; end if;
+		when ZA => if (STROBE==GND)then		WAIT_O=VCC; APRINT=GND; LDATA[]=Z[]; AUT_BUS=ZB; V_SB[]=B"0010";
+						else				WAIT_O=VCC;	APRINT=VCC;	LDATA[]=Z[]; AUT_BUS=ZA; V_SB[]=B"0001"; end if;
+		% oczekiwanie na koniec wydruku	Z					%
+		when ZB => if (AUT_PRINT==SP0)then 	WAIT_O=VCC; APRINT=VCC; LDATA[]=D2[];AUT_BUS=D2A;V_SB[]=B"0011";
+						else				WAIT_O=VCC;	APRINT=GND; LDATA[]=Z[]; AUT_BUS=ZB; V_SB[]=B"0010"; end if;
+		% oczekiwanie na start druku D2						%
+		when D2A => if (STROBE==GND)then	WAIT_O=VCC; APRINT=GND; LDATA[]=D2[];AUT_BUS=D2B;V_SB[]=B"0100";
+						else				WAIT_O=VCC;	APRINT=VCC;	LDATA[]=D2[];AUT_BUS=D2A;V_SB[]=B"0011"; end if;
+		% oczekiwanie na koniec wydruku	D2					%
+		when D2B => if (AUT_PRINT==SP0)then WAIT_O=VCC; APRINT=VCC; LDATA[]=D1[];AUT_BUS=D1A;V_SB[]=B"0101";
+						else				WAIT_O=VCC;	APRINT=GND; LDATA[]=D2[];AUT_BUS=D2B;V_SB[]=B"0100"; end if;
+		% oczekiwanie na start druku D1						%
+		when D1A => if (STROBE==GND)then	WAIT_O=VCC; APRINT=GND; LDATA[]=D1[];AUT_BUS=D1B;V_SB[]=B"0110";
+						else				WAIT_O=VCC;	APRINT=VCC;	LDATA[]=D1[];AUT_BUS=D1A;V_SB[]=B"0101"; end if;
+		% oczekiwanie na koniec wydruku	D1					%
+		when D1B => if (AUT_PRINT==SP0)then WAIT_O=VCC; APRINT=VCC; LDATA[]=D0[];AUT_BUS=D0A;V_SB[]=B"0111";
+						else				WAIT_O=VCC;	APRINT=GND; LDATA[]=D1[];AUT_BUS=D1B;V_SB[]=B"0110"; end if;
+		% oczekiwanie na start druku D0						%
+		when D0A => if (STROBE==GND)then	WAIT_O=VCC; APRINT=GND; LDATA[]=D0[];AUT_BUS=D0B;V_SB[]=B"1000";
+						else				WAIT_O=VCC;	APRINT=VCC;	LDATA[]=D0[];AUT_BUS=D0A;V_SB[]=B"0111"; end if;
+		% oczekiwanie na koniec wydruku	D0					%
+		when D0B => if (AUT_PRINT==SP0)then WAIT_O=GND; APRINT=GND; LDATA[]=Z[]; AUT_BUS=WBU;V_SB[]=B"1001";
+						else				WAIT_O=VCC;	APRINT=GND; LDATA[]=D0[];AUT_BUS=D0B;V_SB[]=B"1000"; end if;
 		% oczekiwanie na wycofanie sie z szyny pol. druku	%
-		when SB3 => if (BPRINT==GND)then	WAIT_O=GND; APRINT=GND; AUT_BUS=SB0;V_SB[]=B"00";
-						else				WAIT_O=GND;	APRINT=GND;	AUT_BUS=SB3;V_SB[]=B"11"; end if;
+		when WBU => if (BPRINT==GND)then	WAIT_O=GND; APRINT=GND; LDATA[]=Z[]; AUT_BUS=IDL;V_SB[]=B"0000";
+						else				WAIT_O=GND;	APRINT=GND;	LDATA[]=Z[]; AUT_BUS=WBU;V_SB[]=B"1001"; end if;
 	end case;
 	
 	% automat obslugujacy drukowanie						%
