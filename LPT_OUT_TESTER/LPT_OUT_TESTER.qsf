@@ -72,9 +72,6 @@ set_location_assignment PIN_136 -to D[2]
 set_location_assignment PIN_135 -to D[1]
 set_location_assignment PIN_133 -to D[0]
 set_location_assignment PIN_125 -to GEN
-set_global_assignment -name AHDL_FILE LPT_OUT.tdf
-set_global_assignment -name AHDL_FILE LPT_OUT_TESTER.tdf
-set_global_assignment -name VECTOR_WAVEFORM_FILE LPT_OUT_TESTER.vwf
 set_location_assignment PIN_51 -to P_1[7]
 set_location_assignment PIN_49 -to P_1[6]
 set_location_assignment PIN_48 -to P_1[5]
@@ -100,3 +97,11 @@ set_location_assignment PIN_62 -to P_2[2]
 set_location_assignment PIN_60 -to P_2[1]
 set_location_assignment PIN_59 -to P_2[0]
 set_global_assignment -name MISC_FILE "E:/various/_PW/PUCY/Projekt_svn/LPT_OUT_TESTER/LPT_OUT_TESTER.dpf"
+set_global_assignment -name AHDL_FILE bcd_blok.tdf
+set_global_assignment -name AHDL_FILE bcd_sumator.tdf
+set_global_assignment -name AHDL_FILE U2_TO_ASCII.tdf
+set_global_assignment -name AHDL_FILE LPT_OUT.tdf
+set_global_assignment -name AHDL_FILE LPT_OUT_TESTER.tdf
+set_global_assignment -name VECTOR_WAVEFORM_FILE LPT_OUT_TESTER.vwf
+set_global_assignment -name MISC_FILE "Z:/16.03c/LPT_OUT_TESTER/LPT_OUT_TESTER.dpf"
+set_location_assignment PIN_111 -to SW1B

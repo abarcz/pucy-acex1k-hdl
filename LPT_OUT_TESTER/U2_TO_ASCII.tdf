@@ -1,0 +1,63 @@
+TITLE "Konwerter liczby U2 (8bit) na 4 znaki ASCII: ZDDD";
+%
+Z - '+' lub '-'
+D - 0..9
+%
+INCLUDE "bcd_sumator.inc";
+
+SUBDESIGN U2_TO_ASCII
+(
+	U2I[7..0]	: input;
+	Z[7..0]		: output;
+	D2[7..0]	: output;
+	D1[7..0]	: output;
+	D0[7..0]	: output;
+)
+
+VARIABLE
+	BCD[7..0]	: NODE;
+	U2[7..0]	: NODE;
+	S0			: bcd_sumator;
+	S1			: bcd_sumator;
+	S2			: bcd_sumator;
+	S3			: bcd_sumator;
+	
+BEGIN
+	S0.CIN	= U2I[7];	% jesli liczba ujemna, dodajemy 1 %
+	if (U2I[7]==1) then	U2[] = !U2I[];	% negacja na potrzeby dodawania %
+		else			U2[] = U2I[];
+	end if;
+	
+	S0.XX[]	= (0,0,0,0,0,U2[2],U2[1],U2[0]);
+	S0.YY[]	= (0,0,0,0,U2[3],0,0,0);
+	S1.XX[]	= S0.ZZ[];
+	S1.CIN	= S0.NAD;
+	S2.CIN	= S1.NAD;
+	S3.CIN	= S2.NAD;
+
+	% 16 %
+	if (U2[4]==1) then	S1.YY[] = (0,0,0,1,0,1,1,0);
+		else			S1.YY[] = (0,0,0,0,0,0,0,0);
+	end if;
+	S2.XX[]	= S1.ZZ[];
+	
+	% 32 %
+	if (U2[5]==1) then	S2.YY[] = (0,0,1,1,0,0,1,0);
+		else			S2.YY[] = (0,0,0,0,0,0,0,0);
+	end if;
+	S3.XX[] = S2.ZZ[];
+	
+	% 64 %
+	if (U2[6]==1) then	S3.YY[] = (0,1,1,0,0,1,0,0);
+		else			S3.YY[] = (0,0,0,0,0,0,0,0);
+	end if;
+	BCD[]	= S3.ZZ[];
+	
+	% wyznaczenie wartosci znakow ASCII %
+	if (U2I[7]==1) then	Z[] = H"2D";	% '-' %
+		else			Z[] = H"2B";	% '+' %
+	end if;
+	D2[] = (0,0,1,1,0,0,0,S3.NAD);
+	D1[] = (0,0,1,1,BCD[7],BCD[6],BCD[5],BCD[4]);
+	D0[] = (0,0,1,1,BCD[3],BCD[2],BCD[1],BCD[0]);
+END;
