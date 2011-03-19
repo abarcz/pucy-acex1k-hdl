@@ -1,0 +1,16 @@
+﻿Od góry idąc:
+
+SW3B(in)	- sygnał RESET z przełącznika SW3B (aktywny GND)
+SW1B(in)	- jedno przejście ->VCC->GND powoduje jeden cykl przepisania danych z modułu PS/2 do LPT
+V_IORQ, V_WR, V_RD, V_A - standardowe sygnały szyny
+PS2_WAIT(in)	- sygnał WAIT z PS2. doczepiłem go sobie jako input, możesz wywalić i zastąpić wyjściem swojego PS2.WAIT
+V_WLPT		- sygnał WAIT z LPT
+PS2_D(in)	- sygnał D z PS2, j.w.
+V_DIB		- wewnetrzny bufor danych, wczytuje dane z PS2_D, wypisuje na V_DO
+V_DO		- szyna D dla LPT
+P_3		- port CTRL dla LPT, zmiany oznaczają zmiany poziomu STROBu
+P_2		- port STATUSu dla LPT
+P_1		- port DATA dla LPT, wypisywane są na nim znaki ASCII (cr,Z,D2,D1,D0,lf)
+AUT_TEST	- automat sterujący modułem overlorda
+L_A, L_B	- diody
+
