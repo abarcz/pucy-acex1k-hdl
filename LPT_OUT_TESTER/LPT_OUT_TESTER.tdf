@@ -7,6 +7,7 @@ liczbe U2 wpisana na klawiaturze jako ZDDD
 na drukarke odebrana z PS/2 liczbe U2 (druk jako ZDDD)
 %
 INCLUDE "LPT_OUT.inc";
+INCLUDE "PS2_IN.inc";
 
 CONSTANT lpt_addr = H"10";	% adres drukarki LPT w IO		%
 CONSTANT ps2_addr = H"50";	% adres klawiatury PS/2 w IO	%
@@ -21,22 +22,22 @@ SUBDESIGN LPT_OUT_TESTER
 	P_1[7..0]	: output;	% port danych do LPT (SV1)		%
 	P_2[7..0]	: input;	% port stanu z LPT (SV2)		%
 	P_3[7..0]	: output;	% port sterowania do LPT (SV3)	% 
-	SW1B		: input;	% przelacznik RUN: VCC=>przeslij%
+	P_4[7..0]	: input;	% port wejsciowy z PS/2 (SV4)	%
+	P_5[7..0]	: output;	% port SV5						%
+	%SW1B		: input;%	% przelacznik RUN: VCC=>przeslij%
+	%SW2B		: input;%	% przelacznik SW2B, nieuzywany	%
 	SW3B		: input;	% przelacznik RESET: GND=>RES	%
 	
-	% sygnaly debug %
+	% sygnaly debug na potrzeby symulacji					%
 	V_A[7..0]	: output;
 	V_DIB[7..0]	: output;
 	V_DO[7..0]	: output;
+	V_DI[7..0]	: output;
 	V_WR		: output;	
 	V_RD		: output;
 	V_IORQ		: output;
 	V_WLPT		: output;
-	PS2_WAIT	: input;
-	PS2_D[7..0]	: input;
-	
-	% debug - przelacznik pracy krokowej LPT				%
-	SW2B		: input;	% TODO zamapowac na piny		%
+	V_WPS2		: output;
 )
 VARIABLE
 	% sygnaly wewnetrznej szyny mikrokontrolera				%
@@ -56,10 +57,14 @@ VARIABLE
 	DI[7..0]	: NODE;		% dane przesylane z PS/2 (U2)	%
 	DO[7..0]	: NODE;		% dane wysylane na LPT (U2)		%
 	
+	% sygnal gotowosci drukarki, aktywny '1'				%
+	PRN_READY	: NODE;
+	
 	% wewnetrzne zmienne modulu								%
 	DIB[7..0]	: DFF;		% zbuforowane DI[]				%
 	RESET		: NODE;		% wewnetrzny sygnal RESET		%
 	LPT			: LPT_OUT;	% modul kontrolera LPT			%
+	PS2			: PS2_IN;	% modul kontrolera PS/2			%
 
 	% automat pobierajacy liczbe U2 z PS/2 i wysylajacy na LPT	%
 	AUT_TEST	: machine of bits (QT[2..0])
@@ -74,8 +79,10 @@ BEGIN
 	V_RD		= !nRD_SYN;
 	V_IORQ		= !nIORQ_SYN;
 	V_DIB[]		= DIB[];
+	V_DI[]		= DI[];
 	V_DO[]		= DO[];
 	V_WLPT		= WAIT_LPT;
+	V_WPS2		= WAIT_PS2;
 	
 	% podlaczenie przerzutnikow DFF i automatow				%
 	DIB[].clk	= GEN;
@@ -98,18 +105,30 @@ BEGIN
 	
 	% sygnal resetujacy z przelacznika 3					%
 	RESET		= SW3B;
-	
+
 	% :TODO: sygnalizacja na diodach:
 	- ilosci odebranych przez PS/2 znakow
 	- ...
 	%
-	L_A[]		= 0-1;
-	L_B[]		= 0-1;
+	L_A[]		= (!PRN_READY,WAIT_PS2,WAIT_LPT,1,1,!QT[]);
+	L_B[]		= !DIB[];
 	
-	% :TODO: podlaczenie koncowek modulu PS/2				%
-	% ... %
-	DI[]		= PS2_D[];
-	WAIT_PS2 	= PS2_WAIT;
+	% podlaczenie koncowek modulu PS/2						%
+	%DI[]		= H"02";
+	WAIT_PS2	= SW2B;%
+	% WE/WY													%
+	PS2.PDATA_IN[]	= P_4[];
+	P_5[]		= PS2.PS2_DEBUG_PORT[];
+	% sygnaly wewnetrznej szyny mikrokontrolera				%
+	WAIT_PS2	= PS2.WAIT;
+	DI[]		= PS2.DATA[];
+	PS2.ADDR[]	= A[];
+	PS2.IORQ	= !nIORQ_SYN;
+	PS2.RD		= !nRD_SYN;
+	% sygnaly kontrolne										%
+	PS2.RESET	= RESET;
+	PS2.GEN		= GEN;
+	
 	
 	% podlaczenie koncowek modulu LPT						%
 	% WE/WY													%
@@ -125,30 +144,30 @@ BEGIN
 	% sygnaly kontrolne										%
 	LPT.GEN		= GEN;
 	LPT.RESET	= RESET;
-	LPT.STEP_SW0= SW2B;		% przelacznik do pracy krokowej	%	
+	PRN_READY	= LPT.PRN_READY;
 	
 	% automat pobierajacy liczbe U2 z PS/2 i wysylajacy na LPT	%
 	case AUT_TEST is
 		% oczekiwanie na sygnal startu cyklu z przelacznika		%
-		when IDL => if (SW1B==VCC) then 	A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; 			AUT_TEST=PSA;
+		when IDL => if (%SW1B==%VCC) then 	A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; 			AUT_TEST=PSA;
 			else							A[]=ps2_addr; IORQ=VCC; RD=VCC; WR=VCC; 			AUT_TEST=IDL; end if;
 		% wystawienie komendy odczytu z PS2/2, czeka na WAIT=H	%
-		when PSA => if (WAIT_PS2==VCC) then	A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; 			AUT_TEST=PSB;
+		when PSA => if (WAIT_PS2==GND) then	A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; DIB[]=DI[];	AUT_TEST=PSB;
 			else							A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; 			AUT_TEST=PSA; end if;
 		% oczekiwanie na WAIT=L, aby wczytac dane do DIB		%
-		when PSB => if (WAIT_PS2==GND) then	A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; DIB[]=DI[]; AUT_TEST=SWA;
-			else							A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; 			AUT_TEST=PSB; end if;
+		when PSB => if (WAIT_PS2==VCC) then	A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; DIB[]=DI[]; AUT_TEST=SWA;
+			else							A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; DIB[]=DI[];	AUT_TEST=PSB; end if;
 		% zmiana sygnalow na komende zapisu do LPT				%
 		when SWA => 						A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPA;
 		% wystawienie komendy zapisu na LPT, czeka na WAIT=H	%
-		when LPA => if (WAIT_LPT==VCC) then	A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPB;
+		when LPA => if (WAIT_LPT==GND) then	A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPB;
 			else							A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPA; end if;
 		% oczekiwanie na WAIT=L (koniec wydruku)				%
-		when LPB => if (WAIT_LPT==GND) then	A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; 			AUT_TEST=AEN;
+		when LPB => if (WAIT_LPT==VCC) then	A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; 			DIB[]=DIB[]; AUT_TEST=AEN;
 			else							A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPB; end if;
 		% oczekiwanie na ustawienie przelacznika w pozycje GND	%
-		when AEN => if (SW1B==GND) then		A[]=ps2_addr; IORQ=VCC; RD=VCC; WR=VCC; 			AUT_TEST=IDL;
-			else							A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; 			AUT_TEST=AEN; end if;
+		when AEN => if (%SW1B==GND%VCC) then		A[]=ps2_addr; IORQ=VCC; RD=VCC; WR=VCC; 			AUT_TEST=IDL;
+			else							A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; 			DIB[]=DIB[]; AUT_TEST=AEN; end if;
 	end case;
 	
 END;
