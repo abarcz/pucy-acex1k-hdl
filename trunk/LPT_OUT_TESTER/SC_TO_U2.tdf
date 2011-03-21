@@ -1,0 +1,83 @@
+TITLE "Scancode to U2 conversion";
+%
+
+%	
+INCLUDE "SC_TO_BCD.inc";
+
+SUBDESIGN SC_TO_U2
+(
+	GEN 			: input;	-- 20MHz clock 
+	RESET			: input;	-- Reset signal from uC
+	
+	SC_Z[7..0]			: input;
+	SC_D0[7..0]			: input;
+	SC_D1[7..0]			: input;
+	SC_D2[7..0]			: input;
+	
+	U2_MS[7..0]			: output;
+	U2_LS[7..0]			: output;
+)
+VARIABLE
+	SIGN				: DFF;		-- Sign of number
+	S2B0				: SC_TO_BCD;
+	S2B1				: SC_TO_BCD;
+	S2B2				: SC_TO_BCD;
+	BCD_D0[7..0]		: DFF;
+	BCD_D1[7..0]		: DFF;
+	BCD_D2[7..0]		: DFF;
+	D0[7..0]			: DFF;
+	D1[7..0]			: DFF;
+	D2[7..0]			: DFF;
+	BINARY[7..0]		: DFF;
+	NEGATOR[8..0]		: DFF;
+	NEGATED[8..0]		: DFF;
+	NEGATION[8..0]		: DFF;
+	RESULT[7..0]		: DFF;
+BEGIN
+
+	% Clock %
+	SIGN.CLK			= GEN;
+	BCD_D0[].CLK		= GEN;
+	BCD_D1[].CLK		= GEN;
+	BCD_D2[].CLK		= GEN;
+	D0[].CLK			= GEN;
+	D1[].CLK			= GEN;
+	D2[].CLK			= GEN;
+	BINARY[].CLK		= GEN;
+	NEGATOR[].CLK		= GEN;
+	NEGATED[].CLK		= GEN;
+	NEGATION[].CLK		= GEN;
+	RESULT[].CLK		= GEN;
+	
+	% SC to BCD %
+	S2B0.SC[] = SC_D0[];
+	BCD_D0[] = S2B0.BCD[];
+	
+	S2B1.SC[] = SC_D1[];
+	BCD_D1[] = S2B1.BCD[];
+	
+	S2B2.SC[] = SC_D2[];
+	BCD_D2[] = S2B2.BCD[];
+	
+	% Multiplication %
+	D0[] = BCD_D0[];
+	D1[] = BCD_D1[]*10;
+	D2[] = BCD_D2[]*100;
+	
+	% Sum %
+	BINARY[] = D0[] + D1[] + D2[];
+	
+	% Sign %
+	if( SC_Z[] == H"4E" ) then
+		NEGATOR[] = B"100000000";
+		NEGATED[] = (GND, BINARY[7..0]);
+		NEGATION[] = NEGATOR[] - NEGATED[];
+		RESULT[] = (NEGATION[7..0]);
+	else
+		RESULT[] = BINARY[];
+	end if;
+	
+	--debug
+	U2_LS[] = RESULT[];
+	U2_MS[] = (GND, GND, GND, GND, GND, GND, GND, GND);
+END;
