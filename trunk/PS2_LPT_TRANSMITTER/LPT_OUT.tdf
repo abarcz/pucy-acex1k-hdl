@@ -7,7 +7,7 @@ i wysy³aj¹cy j¹ w postaci ZDDD przez port LPT do drukarki.
 %
 INCLUDE "U2_TO_ASCII.inc";
 
-CONSTANT strobe_time = 0;	% 0,5us dla !STROBE 				%
+CONSTANT strobe_time = 10;	% 0,5us dla !STROBE 				%
 % 0,5u / 0,05u = 10												%
 
 CONSTANT dev_addr 	= H"10";	% adres tego urzadzenia w IO	%
@@ -133,7 +133,7 @@ BEGIN
 	
 	% wystawienie sygnalu WAIT na szyne							%
 	WAIT			= !nWAIT_SYN;
-	%WAIT 			= TRI(!nWAIT_SYN, BPRINT);%	 % (in, oe) 	%
+	%WAIT 			= TRI(!nWAIT_SYN, BPRINT);	% % (in, oe) 	%
 	
 	% automat obslugujacy szyne i sterujacy logika wydruku		%
 	case AUT_BUS is

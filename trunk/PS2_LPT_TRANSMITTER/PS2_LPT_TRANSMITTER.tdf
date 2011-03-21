@@ -24,7 +24,7 @@ SUBDESIGN PS2_LPT_TRANSMITTER
 	P_3[7..0]	: output;	% port sterowania do LPT (SV3)	% 
 	P_4[7..0]	: input;	% port wejsciowy z PS/2 (SV4)	%
 	P_5[7..0]	: output;	% port SV5						%
-	P_7[7..0]	: input;	% port SV7 (nieuzywany)			%
+	P_7[7..0]	: output;	% port SV7 (nieuzywany)			%
 	%SW1B		: input;%	% przelacznik RUN: VCC=>przeslij%
 	%SW2B		: input;%	% przelacznik SW2B, nieuzywany	%
 	SW3B		: input;	% przelacznik RESET: GND=>RES	%
@@ -82,6 +82,7 @@ BEGIN
 	V_DI[]		= DI[];
 	V_WLPT		= WAIT_LPT;
 	V_WPS2		= WAIT_PS2;
+	P_7[]		= 0;
 	
 	% podlaczenie przerzutnikow DFF i automatow				%
 	DIB[].clk	= GEN;
