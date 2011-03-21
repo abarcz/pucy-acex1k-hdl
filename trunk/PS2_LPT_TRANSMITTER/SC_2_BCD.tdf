@@ -1,0 +1,26 @@
+TITLE "Scancode to BCD conversion";
+%
+
+%	
+SUBDESIGN SC_TO_BCD
+(
+	SC[7..0]		: input;
+	BCD[7..0]		: output;
+)
+BEGIN
+	TABLE 	SC[] 	=> 		BCD[];
+			H"45"	=>		B"00000000";
+			H"16"	=>		B"00000001";
+			H"1E"	=>		B"00000010";
+			H"26"	=>		B"00000011";
+			H"25"	=>		B"00000100";
+			H"2E"	=>		B"00000101";
+			H"36"	=>		B"00000110";
+			H"3D"	=>		B"00000111";
+			H"3E"	=>		B"00001000";
+			H"46"	=>		B"00001001";
+			-- debug
+			H"0F"	=>		B"00000001";
+			H"8F"	=>		B"00000010";
+	END TABLE;
+END;	
