@@ -1,11 +1,11 @@
 TITLE "Scancode to BCD conversion";
-%
-
-%	
+%------------------------------------------------------------------
+	PS/2 input module : Scancode decoder
+%------------------------------------------------------------------
 SUBDESIGN SC_TO_BCD
 (
-	SC[7..0]		: input;
-	BCD[7..0]		: output;
+	SC[7..0]		: input;	-- Scancode input
+	BCD[7..0]		: output;	-- BCD output
 )
 BEGIN
 	TABLE 	SC[] 	=> 		BCD[];
