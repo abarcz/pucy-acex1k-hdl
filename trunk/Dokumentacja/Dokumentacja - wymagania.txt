@@ -1,0 +1,9 @@
+﻿- całość w pdf
+- nr zadania (+ treść?), imiona nazwiska
+- założenia projektowe
+- opis sygnałów LPT
+- opis odbierania PS/2
+- zrzuty ekranu z symulacji (4-5): m.in. wydruk jednego znaku LPT, jedna symulacja pokazująca całość jednego cyklu urządzenia (PS2->LPT)
+- kody źródłowe
+
++ paczka uruchomieniowa, żeby dało się projekt odpalić
