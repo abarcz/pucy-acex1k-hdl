@@ -111,7 +111,7 @@ BEGIN
 	- ...
 	%
 	L_A[]		= (!PRN_READY,WAIT_PS2,WAIT_LPT,1,1,!QT[]);
-	L_B[]		= !DIB[];
+	L_B[]		= !PS2.PS2_DEBUG_PORT[];
 	
 	% podlaczenie koncowek modulu PS/2						%
 	%DI[]		= H"02";

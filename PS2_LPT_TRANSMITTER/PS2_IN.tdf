@@ -1,9 +1,11 @@
 TITLE "PS/2 INPUT";
-%
-
-%
+%------------------------------------------------------------------
+	PS/2 input module : Communication between PS/2 bus and System
+						bus.
+%------------------------------------------------------------------
 INCLUDE "SC_TO_U2.inc";
-CONSTANT ps2_addr = H"50";	
+
+CONSTANT ps2_addr = H"50";				-- Keyboard address in I/O
 
 SUBDESIGN PS2_IN
 (
@@ -11,70 +13,56 @@ SUBDESIGN PS2_IN
 	RESET				 	: input;	-- Reset signal from uC
 	
 	-- Bus
-	ADDR[7..0]				: input;
-	DATA[7..0]				: output;
-	WAIT				 	: output;
-	IORQ					: input;
-	RD						: input;
-	
+	ADDR[7..0]				: input;	-- Address bus
+	DATA[7..0]				: output;	-- Data bus
+	WAIT				 	: output;	-- Wait signal
+	IORQ					: input;	-- I/O request signal
+	RD						: input;	-- Read signal
 	
 	-- PS/2 debug
-	PS2_DEBUG_PORT[7..0] 	: output;
-	PD_1[7..0]			 	: output;
-	F_U[7..0]			 	: output;
-	F_D[7..0]			 	: output;
+	PS2_DEBUG_PORT[7..0] 	: output;	-- Output port for debugging
 	
 	-- PS/2 connection port
-	PDATA_IN[7..0] 			: input;
-	PDATA_OUT[7..0] 		: output; 
+	PDATA_IN[7..0] 			: input;	-- PS/2 bus input port
 )
 VARIABLE
-	%---------------------- PS/2 ---------------------------%
 	-- Bus
-	-- Debug
-	D_READ					: DFF;
-	D_PD1[7..0]				: DFF;
-	D_F_U[7..0]				: DFF;
-	D_F_D[7..0]				: DFF;
-	CMD_READ				: DFF;
-	KEY_Z[7..0]				: DFF;
-	KEY_D0[7..0]			: DFF;
-	KEY_D1[7..0]			: DFF;
-	KEY_D2[7..0]			: DFF;
-	SIG_WAIT				: DFF;
-	DFF_DATA[7..0]			: DFF;
-	CNT_DATA[7..0]			: DFF;
-	S2U						: SC_TO_U2;
+	CMD_READ				: DFF;		-- Read command from uC
+	KEY_Z[7..0]				: DFF;		-- Sign byte from keyboard
+	KEY_D0[7..0]			: DFF;		-- First number
+	KEY_D1[7..0]			: DFF;		-- Second number
+	KEY_D2[7..0]			: DFF;		-- Third number
+	SIG_WAIT				: DFF;		-- Wait signal for uC
+	DFF_DATA[7..0]			: DFF;		-- Register for final U2 number
+	CNT_DATA[7..0]			: DFF;  	-- Wait extension counter
+	S2U						: SC_TO_U2;	-- Scancode to U2 decoder  
 	-- Secure input dff's
-	DFF_1_PS2_CLK			: DFF;	-- Input dff #1 for clock
-	DFF_2_PS2_CLK			: DFF;	-- Input dff #2 for clock
-	DFF_1_PS2_DATA			: DFF;  -- Input dff #1 for data
-	DFF_2_PS2_DATA			: DFF;	-- Input dff #2 for data 
-	-- Noise filtering
-	CNT_FILTER_CLK[1..0] 	: DFF;	-- Clock filter counter
-	CNT_FILTER_DATA[1..0]	: DFF;	-- Data filter counter
-	PS2_CLK_CLEAN			: DFF;	-- Filtered clock
-	PS2_DATA_CLEAN			: DFF;	-- Filtered data
+	DFF_1_PS2_CLK			: DFF;		-- Input dff #1 for clock
+	DFF_2_PS2_CLK			: DFF;		-- Input dff #2 for clock
+	DFF_1_PS2_DATA			: DFF;  	-- Input dff #1 for data
+	DFF_2_PS2_DATA			: DFF;		-- Input dff #2 for data 
 	-- Data recieving
-	PS2_FRAME[10..0]			: DFF;	-- Recieved frame
-	PS2_CNT_FRAME[3..0]			: DFF;  -- Frame bit's counter
-	PS2_CNT_BYTE[1..0]			: DFF;  -- ZDDD byte counter
-	PS2_BYTE[7..0]				: DFF;
-	PS2_BYTE_READY				: DFF;
-	D_PS2_DEBUG_PORT[7..0]		: DFF;
-	%-------------------------------------------------------%
+	PS2_FRAME[10..0]		: DFF;		-- Recieved frame
+	PS2_CNT_FRAME[3..0]		: DFF;  	-- Frame bit's counter
+	PS2_CNT_BYTE[1..0]		: DFF;  	-- ZDDD byte counter
+	PS2_BYTE[7..0]			: DFF;		-- Data from PS/2 frame - hardwired
+	PS2_BYTE_READY			: DFF;		-- Data byte is ready flag
+	-- Debug
+	D_PS2_DEBUG_PORT[7..0]	: DFF;		-- Debugging register
 	
+	-- Machines
+	
+	-- Machine for PS/2 bus communication
 	AUT_PS2 	: machine of bits (Q[1..0])
 					with states (S0=B"00", S1=B"01",
 									S2=B"10", S3=B"11");
 									
-	
+	-- Machine for system bus communication
 	AUT_PS2_BUS	: machine of bits (QB[2..0])
 					with states (SPB0=B"000", SPB1=B"001", SPB2=B"010", 
 									SPB3=B"011", SPB4=B"100", SPB5=B"101",
 									SPB6=B"110", SPB7=B"111");
 									
-	%-------------------------------------------------------%
 			
 BEGIN
 	% assign global clock %
@@ -82,10 +70,6 @@ BEGIN
 	DFF_2_PS2_CLK.CLK 		= GEN;
 	DFF_1_PS2_DATA.CLK 		= GEN;
 	DFF_2_PS2_DATA.CLK 		= GEN;
-	CNT_FILTER_CLK[].CLK 	= GEN;
-	CNT_FILTER_DATA[].CLK 	= GEN;
-	PS2_CLK_CLEAN.CLK 		= GEN;
-	PS2_DATA_CLEAN.CLK 		= GEN;
 	PS2_FRAME[].CLK 		= GEN;
 	PS2_CNT_FRAME[].CLK 	= GEN;
 	PS2_CNT_BYTE[].CLK		= GEN;
@@ -93,9 +77,6 @@ BEGIN
 	PS2_BYTE[].CLK 			= GEN;
 	PS2_BYTE_READY.CLK 		= GEN;
 	CMD_READ.CLK			= GEN;
-	D_PD1[].CLK 			= GEN;
-	D_F_U[].CLK				= GEN;
-	D_F_D[].CLK				= GEN;
 	KEY_Z[].CLK				= GEN;
 	KEY_D0[].CLK			= GEN;
 	KEY_D1[].CLK			= GEN;
@@ -103,25 +84,49 @@ BEGIN
 	DFF_DATA[].CLK			= GEN;
 	SIG_WAIT.CLK			= GEN;
 	CNT_DATA[].CLK			= GEN;
+	S2U.GEN					= GEN;
+	AUT_PS2.CLK 			= GEN;
+	AUT_PS2_BUS.CLK 		= GEN;
 	
+	% assign global reset %
+	S2U.RESET				= RESET;
+	DFF_1_PS2_CLK.CLRN 		= RESET;
+	DFF_2_PS2_CLK.CLRN 		= RESET;
+	DFF_1_PS2_DATA.CLRN 	= RESET;
+	DFF_2_PS2_DATA.CLRN 	= RESET;
+	PS2_FRAME[].CLRN 		= RESET;
+	PS2_CNT_FRAME[].CLRN 	= RESET;
+	PS2_CNT_BYTE[].CLRN		= RESET;
+	D_PS2_DEBUG_PORT[].CLRN = RESET;
+	PS2_BYTE[].CLRN 		= RESET;
+	PS2_BYTE_READY.CLRN 	= RESET;
+	CMD_READ.CLRN			= RESET;
+	KEY_Z[].CLRN			= RESET;
+	KEY_D0[].CLRN			= RESET;
+	KEY_D1[].CLRN			= RESET;
+	KEY_D2[].CLRN			= RESET;
+	DFF_DATA[].CLRN			= RESET;
+	SIG_WAIT.CLRN			= RESET;
+	CNT_DATA[].CLRN			= RESET;	
+	AUT_PS2.RESET 			= !RESET;
+	AUT_PS2_BUS.RESET 		= !RESET;
+	
+	% connect variables %
 	WAIT 					= SIG_WAIT.Q;
 	
-	S2U.GEN					= GEN;
-	S2U.RESET				= RESET;
-	S2U.SC_Z[] = KEY_Z[];
-	S2U.SC_D0[] = KEY_D0[];
-	S2U.SC_D1[] = KEY_D1[];
-	S2U.SC_D2[] = KEY_D2[];
+	S2U.SC_Z[] 				= KEY_Z[];
+	S2U.SC_D0[] 			= KEY_D0[];
+	S2U.SC_D1[] 			= KEY_D1[];
+	S2U.SC_D2[] 			= KEY_D2[];
 	
-	PD_1[] = D_PD1[];
-	F_U[] = D_F_U[];
-	F_D[] = D_F_D[];
-	PS2_DEBUG_PORT[] = D_PS2_DEBUG_PORT[];
+	case PS2_CNT_BYTE[] is
+		when B"00"	=> PS2_DEBUG_PORT[] = 0;
+		when B"01"	=> PS2_DEBUG_PORT[] = 1;
+		when B"10"	=> PS2_DEBUG_PORT[] = 3;
+		when B"11"	=> PS2_DEBUG_PORT[] = 7;
+	end case;
 	
 	DATA[] = DFF_DATA[];
-	
-	AUT_PS2.CLK = GEN;
-	AUT_PS2_BUS.CLK = GEN;
 	
 	% Hardwired byte from frame %
 	PS2_BYTE[] = (PS2_FRAME8,PS2_FRAME7,PS2_FRAME6,PS2_FRAME5,PS2_FRAME4,PS2_FRAME3,PS2_FRAME2,PS2_FRAME1);
@@ -142,8 +147,8 @@ BEGIN
 	end if;
 	
 	case AUT_PS2_BUS is
-		when SPB0 => D_PD1[] = 0;
-					 CMD_READ.D = CMD_READ.Q;
+		% Wait for command from uC %
+		when SPB0 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = B"00000000";
 					 KEY_D0[] = B"00000000";
 					 KEY_D1[] = B"00000000";
@@ -151,18 +156,18 @@ BEGIN
 					 PS2_CNT_BYTE[] = B"00";
 					 CNT_DATA[] = B"00000000";
 					 DFF_DATA[] = 0;
-					 -- debug
-					 D_F_U[] = 0;
-					 D_PS2_DEBUG_PORT[] = 0;
+					
 					 if(CMD_READ.Q == 1) then
 						SIG_WAIT.D = GND;
-						--activate reciever
+						-- activate reciever
 						AUT_PS2_BUS = SPB1;
 					 else
+					    -- unblock after reset
+						SIG_WAIT.D = VCC;
 						AUT_PS2_BUS = SPB0;
 					 end if;
-		when SPB1 => D_PD1[] = 1;
-					 CMD_READ.D = CMD_READ.Q;
+		% Wait for frame %
+		when SPB1 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
 					 KEY_D0[] = KEY_D0[];
 					 KEY_D1[] = KEY_D1[];
@@ -170,17 +175,14 @@ BEGIN
 					 CNT_DATA[] = CNT_DATA[];
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
-					 -- debug
-					 D_F_U[] = D_F_U[];
-					 D_F_D[] = D_F_D[];
-					 D_PS2_DEBUG_PORT[] = D_PS2_DEBUG_PORT[];
+					
 					 if(PS2_BYTE_READY.Q == 1) then
 						AUT_PS2_BUS = SPB2;
 					 else
 						AUT_PS2_BUS = SPB1;
 					 end if;
-		when SPB2 => D_PD1[] = 2;
-					 CMD_READ.D = CMD_READ.Q;
+		% Check if frame data is "F0" %
+		when SPB2 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
 					 KEY_D0[] = KEY_D0[];
 					 KEY_D1[] = KEY_D1[];
@@ -188,15 +190,14 @@ BEGIN
 					 CNT_DATA[] = CNT_DATA[];
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
-					 -- debug
-					 D_F_U[] = 2;
+					 
 					 if(PS2_BYTE[] == B"11110000") then
 						AUT_PS2_BUS = SPB3;
 					 else
 						AUT_PS2_BUS = SPB1;
 					 end if;
-		when SPB3 => D_PD1[] = 3;
-					 CMD_READ.D = CMD_READ.Q;
+		% Wait for data frame ( after "F0" comes scancode of key ) %
+		when SPB3 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
 					 KEY_D0[] = KEY_D0[];
 					 KEY_D1[] = KEY_D1[];
@@ -204,16 +205,14 @@ BEGIN
 					 CNT_DATA[] = CNT_DATA[];
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
-					 -- debug
-					 D_F_U[] = 3;	
-					 D_PS2_DEBUG_PORT[] = D_PS2_DEBUG_PORT[];
+					 
 					 if(PS2_BYTE_READY.Q == 1) then
 						AUT_PS2_BUS = SPB4;
 					 else
 						AUT_PS2_BUS = SPB3;
 					 end if;
-		when SPB4 => D_PD1[] = 4;
-					 CMD_READ.D = CMD_READ.Q;
+		% Write key scancode into correct buffer %
+		when SPB4 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
 					 KEY_D0[] = KEY_D0[];
 					 KEY_D1[] = KEY_D1[];
@@ -221,9 +220,7 @@ BEGIN
 					 CNT_DATA[] = CNT_DATA[];
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[]+1;
-					 -- debug
-					 D_F_U[] = 4;
-					 D_PS2_DEBUG_PORT[] = D_PS2_DEBUG_PORT[];
+					 
 					 case PS2_CNT_BYTE[] is
 						when 0 => KEY_Z[] = PS2_BYTE[];
 								  AUT_PS2_BUS = SPB1;
@@ -234,19 +231,16 @@ BEGIN
 						when 3 => KEY_D0[] = PS2_BYTE[];
 								  AUT_PS2_BUS = SPB5;
 					 end case;
-		when SPB5 => D_PD1[] = 5;
-					 CMD_READ.D = CMD_READ.Q;
+		% Convert ZDDD to U2 and put it on data bus %
+		when SPB5 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
 					 KEY_D0[] = KEY_D0[];
 					 KEY_D1[] = KEY_D1[];
 					 KEY_D2[] = KEY_D2[];
 					 CNT_DATA[] = CNT_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
-					 -- debug
-					 D_F_U[] = 5;
-					 
+			
 					 DFF_DATA[] = S2U.U2_LS[];
-					 D_PS2_DEBUG_PORT[] = S2U.U2_LS[];
 					 
 					 if( CNT_DATA[] < 20 ) then
 						AUT_PS2_BUS = SPB6;
@@ -254,6 +248,7 @@ BEGIN
 						AUT_PS2_BUS = SPB7;
 					 end if;
 						
+		% Extend wait signal %
 		when SPB6 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
 					 KEY_D0[] = KEY_D0[];
@@ -262,9 +257,9 @@ BEGIN
 					 CNT_DATA[] = CNT_DATA[]+1;
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
 					 DFF_DATA[] = DFF_DATA[];
-					 D_PS2_DEBUG_PORT[] = D_PS2_DEBUG_PORT[];
 					 
 					 AUT_PS2_BUS = SPB5;
+		% Remove Wait, and wait for processor read %
 		when SPB7 => SIG_WAIT.D = VCC;
 					 CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
@@ -275,7 +270,6 @@ BEGIN
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
 					 
 					 DFF_DATA[] = DFF_DATA[];
-					 D_PS2_DEBUG_PORT[] = D_PS2_DEBUG_PORT[];
 					 
 					 if(IORQ == VCC & RD == VCC)then
 						AUT_PS2_BUS = SPB0;
@@ -286,48 +280,43 @@ BEGIN
 	end case;
 
 	case AUT_PS2 is
-		% PS2 clock down - read! %
+		% PS2 clock down - start bit %
 		when S0 =>  PS2_CNT_FRAME[] = B"0000";
 					PS2_FRAME[] = B"00000000000";
 					PS2_BYTE_READY.D = GND;
-					D_F_D[] = 0;
-					--D_PS2_DEBUG_PORT[] = 0;
+					
 					if(DFF_1_PS2_CLK.Q == 0 & DFF_2_PS2_CLK.Q == 1) then
 						AUT_PS2 = S2;
 					else
 						AUT_PS2 = S0;
 					end if; 
-		% Read one bit into frame buffer %
+		% Wait for clock falling edge %
 		when S1 => 	PS2_CNT_FRAME[] = PS2_CNT_FRAME[];
 					PS2_FRAME[] = PS2_FRAME[];
 					PS2_BYTE_READY.D = GND;
-					D_F_D[] = 1;
-					--D_PS2_DEBUG_PORT[] = 1;
+				
 					if(DFF_1_PS2_CLK.Q == 0 & DFF_2_PS2_CLK.Q == 1) then
 						AUT_PS2 = S2;
 					else
 						AUT_PS2 = S1;
 					end if;
-		% Bit has been read - wait for rising edge and go wait for another bit %
+		% Read bit into frame buffer %
 		when S2 =>	PS2_CNT_FRAME[] = PS2_CNT_FRAME[]+1;
 					PS2_FRAME[] = (DFF_2_PS2_DATA.Q, PS2_FRAME[10..1]);
 					PS2_BYTE_READY.D = GND;
-					D_F_D[] = 2;
-					--D_PS2_DEBUG_PORT[] = 2;
+	
 					if(PS2_CNT_FRAME[] < 10) then
 						AUT_PS2 = S1;
 					else
 						AUT_PS2 = S3;
 					end if;
-		% Frame of 11 bits has been read - show frame and go wait for another %
+		% 11 bit frame is ready %
 		when S3 => 	PS2_FRAME[] = PS2_FRAME[];
 					PS2_CNT_FRAME[] = PS2_CNT_FRAME[];
-					D_F_D[] = 3;
-					--D_PS2_DEBUG_PORT[] = 3;
+
 					PS2_BYTE_READY.D = VCC;
 					-- reciever off
 					AUT_PS2 = S0;
 	end case;
-	%-------------------------------------------------------%
-	
+
 END;			
