@@ -1,4 +1,4 @@
-TITLE "Modu³ przesylajacy liczbe U2 z PS/2 na LPT";
+TITLE "Modul przesylajacy liczbe U2 z PS/2 na LPT";
 %
 Modul ma na celu zaprezentowanie dzialania:
 - kontrolera portu wejsciowego PS/2, odczytujacego
@@ -66,7 +66,7 @@ VARIABLE
 	LPT			: LPT_OUT;	% modul kontrolera LPT			%
 	PS2			: PS2_IN;	% modul kontrolera PS/2			%
 
-	% automat pobierajacy liczbe U2 z PS/2 i wysylajacy na LPT	%
+	% automat pobierajacy liczbe U2 z PS/2 i wysylajacy na LPT%
 	AUT_TEST	: machine of bits (QT[2..0])
 					with states (	IDL=B"000", PSA=B"001",
 									PSB=B"010", SWA=B"011",
@@ -106,10 +106,7 @@ BEGIN
 	% sygnal resetujacy z przelacznika 3					%
 	RESET		= SW3B;
 
-	% :TODO: sygnalizacja na diodach:
-	- ilosci odebranych przez PS/2 znakow
-	- ...
-	%
+	% sygnalizacja na diodach								%
 	L_A[]		= (!PRN_READY,WAIT_PS2,WAIT_LPT,1,1,!QT[]);
 	L_B[]		= !PS2.PS2_DEBUG_PORT[];
 	
@@ -149,25 +146,57 @@ BEGIN
 	% automat pobierajacy liczbe U2 z PS/2 i wysylajacy na LPT	%
 	case AUT_TEST is
 		% oczekiwanie na sygnal startu cyklu z przelacznika		%
-		when IDL => if (%SW1B==%VCC) then 	A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; 			AUT_TEST=PSA;
-			else							A[]=ps2_addr; IORQ=VCC; RD=VCC; WR=VCC; 			AUT_TEST=IDL; end if;
+		when IDL => if (%SW1B==%VCC) then 	
+				A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC;
+										AUT_TEST=PSA;
+			else							
+				A[]=ps2_addr; IORQ=VCC; RD=VCC; WR=VCC; 
+										AUT_TEST=IDL; end if;
+				
 		% wystawienie komendy odczytu z PS2/2, czeka na WAIT=H	%
-		when PSA => if (WAIT_PS2==GND) then	A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; DIB[]=DI[];	AUT_TEST=PSB;
-			else							A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; 			AUT_TEST=PSA; end if;
+		when PSA => if (WAIT_PS2==GND) then	
+				A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC;
+				DIB[]=DI[];				AUT_TEST=PSB;
+			else							
+				A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; 
+										AUT_TEST=PSA; end if;
+				
 		% oczekiwanie na WAIT=L, aby wczytac dane do DIB		%
-		when PSB => if (WAIT_PS2==VCC) then	A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; DIB[]=DI[]; AUT_TEST=SWA;
-			else							A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; DIB[]=DI[];	AUT_TEST=PSB; end if;
+		when PSB => if (WAIT_PS2==VCC) then	
+				A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; 
+				DIB[]=DI[]; 			AUT_TEST=SWA;
+			else							
+				A[]=ps2_addr; IORQ=GND; RD=GND; WR=VCC; 
+				DIB[]=DI[];				AUT_TEST=PSB; end if;
+				
 		% zmiana sygnalow na komende zapisu do LPT				%
-		when SWA => 						A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPA;
+		when SWA => 						
+				A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; 
+				DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPA;
+				
 		% wystawienie komendy zapisu na LPT, czeka na WAIT=H	%
-		when LPA => if (WAIT_LPT==GND) then	A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPB;
-			else							A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPA; end if;
+		when LPA => if (WAIT_LPT==GND) then	
+				A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; 
+				DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPB;
+			else							
+				A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; 
+				DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPA; end if;
+				
 		% oczekiwanie na WAIT=L (koniec wydruku)				%
-		when LPB => if (WAIT_LPT==VCC) then	A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; 			DIB[]=DIB[]; AUT_TEST=AEN;
-			else							A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPB; end if;
+		when LPB => if (WAIT_LPT==VCC) then	
+				A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; 
+				DIB[]=DIB[]; 			AUT_TEST=AEN;
+			else							
+				A[]=lpt_addr; IORQ=GND; RD=VCC; WR=GND; 
+				DO[]=DIB[]; DIB[]=DIB[]; AUT_TEST=LPB; end if;
+				
 		% oczekiwanie na ustawienie przelacznika w pozycje GND	%
-		when AEN => if (%SW1B==GND%VCC) then		A[]=ps2_addr; IORQ=VCC; RD=VCC; WR=VCC; 			AUT_TEST=IDL;
-			else							A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; 			DIB[]=DIB[]; AUT_TEST=AEN; end if;
+		when AEN => if (%SW1B==GND%VCC) then		
+				A[]=ps2_addr; IORQ=VCC; RD=VCC; WR=VCC; 
+										AUT_TEST=IDL;
+			else							
+				A[]=lpt_addr; IORQ=VCC; RD=VCC; WR=VCC; 
+				DIB[]=DIB[]; 			AUT_TEST=AEN; end if;
 	end case;
 	
 END;
