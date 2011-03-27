@@ -14,8 +14,8 @@ SUBDESIGN SC_TO_U2
 	SC_D1[7..0]			: input;		-- D
 	SC_D2[7..0]			: input;		-- D
 	
-	U2_MS[7..0]			: output;		-- Output less significant
-	U2_LS[7..0]			: output;		-- Output most significant (not used)
+	U2_MS[7..0]			: output;		-- Output most significant (not used)
+	U2_LS[7..0]			: output;		-- Output less significant 
 )
 VARIABLE
 	SIGN				: DFF;			-- Sign of number
