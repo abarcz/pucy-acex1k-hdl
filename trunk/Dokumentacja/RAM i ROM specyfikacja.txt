@@ -4,6 +4,7 @@
 --	Czas wyjscia z D po cofnieciu MREQ i RD	: 20ns
 --	Poniewaz T(CPU) = 1/f = 50ns > 25ns, ROM nie wystawia sygnalu WT.
 
+
 --	Blok pamieci RAM	: 1099B
 --	Przestrzen adresowa	: 0x1000..0x144A (4096..5194)
 --	Czas ustalenia sie D przy odczycie: 25ns
@@ -11,4 +12,11 @@
 --	Czas zapisu: 10ns (!MRQ&!WR&A), 
 --	 ale po cofnieciu MRQ i WR: A i D musza pozostac niezmienione przez 10ns
 --	Poniewaz T(CPU) = 1/f = 50ns > 25ns > 10ns, RAM nie wystawia sygnalu WT.
+
+--	Wersja z zatrzaskiwaniem:
+--	Czas ustalenia sie D przy odczycie: 30ns
+--		UWAGA: A i D musza byc ustalone na 10ns przed opuszczeniem MRQ i RD
+--	Czas wyjscia z szyny D po odczycie: 15ns
+--	Czas zapisu: 20ns
+--		UWAGA: A i D musza byc ustalone na 20ns przed opuszczeniem MRQ i WR
 
