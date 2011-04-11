@@ -1,0 +1,257 @@
+TITLE "LPT_OUT modul obslugi wyjsciowego lacza rownoleglego";
+%
+Modul podlaczony do ukladu SML: 235_DB25F,
+odbierajacy z szyny danych 8-bitowa liczbe U2
+i wysylajacy ja w postaci ZDDD przez port LPT do drukarki.
+(Z - znak, D - cyfra dziesietna)
+%
+INCLUDE "U2_TO_ASCII.inc";
+
+CONSTANT strobe_time = 10;	% 0,5us dla !STROBE 				%
+% 0,5u / 0,05u = 10												%
+
+CONSTANT dev_addr 	= H"10";	% adres tego urzadzenia w IO	%
+CONSTANT cr			= H"0D";	% ASCII dla CR					%
+CONSTANT lf			= H"0A";	% ASCII dla LF					%
+
+SUBDESIGN LPT_OUT
+(
+	GEN 		: input;	% zegar 20MHz						%
+	RESET		: input;	% sygnal resetu mikrokontr.			%
+	
+	% sygnaly szyny wewnetrznej mikrokontrolera					%
+	A[7..0]		: input;	% linie adresowe szyny				%
+	D[7..0]		: input;	% linie danych szyny				%
+	IORQ		: input;	
+	WR			: input;
+	WT			: output;
+	
+	% sygnal powiadamiajacy o gotowosci drukarki, aktywny '1'	%
+	PRN_READY	: output;
+	
+	% sygnaly do komunikacji z laczem LPT						%
+	LCTRL[7..0]	: output;		% SV2: nSI,nI,nAF,nS do LPT		%
+	LSTAT[7..0]	: input;		% SV3: BS,PE,nF,S z LPT			%
+	LDATASYN[7..0]	: output;	% SV5: dane do LPT				%
+	
+	% sygnaly debug do symulacji %
+	V_BPRINT	:output;
+	V_APRINT	:output;
+	V_CSTIME[5..0] :output;
+)
+VARIABLE
+	LDATA[7..0]	: DFF;		% synchronizowany sygnal LPT::D 	%
+	BPRINT		: NODE;		% komenda z szyny: drukuj			%
+	APRINT		: NODE;		% komenda od AUT_BUS: drukuj		%
+	WAIT_I		: NODE;		% wewnetrzny sygnal WAIT 			%
+	nWAIT_SYN	: DFF;		% synchronizowany sygnal !WAIT  	%
+	DIN[7..0]	: NODE;		% szyna danych wejsciowych			%
+	PRNT_OK		: NODE;		% czy drukarka ok?(!PE & nF & S)	%
+	BUSY		: NODE;		% sygnal BUSY od drukarki			%
+	STROBE		: NODE;		% wewnetrzny sygnal STROBE			%
+	nSTROBE_SYN	: DFF;		% synchronizowany sygnal !STROBE	%
+	TRI_DI[7..0]: TRI;		% bufor 3stanowy wyjscia na szyne D	%
+	CSTIME[5..0]: DFF;		% zlicza czas strobe				%
+	Z[7..0]		: NODE;		% kod ASCII znaku: 2D='-',2B='+'	%
+	D2[7..0]	: NODE;		% kod ASCII cyfry: 30..39			%
+	D1[7..0]	: NODE;
+	D0[7..0]	: NODE;
+	U2A			: U2_TO_ASCII;	% konwerter U2->ASCII(ZDDD)		%
+	
+	% automat obslugujacy wydruk pojedynczego znaku				%
+	AUT_PRINT	: machine of bits (QP[1..0])
+					with states (SP0=B"00", SP1=B"01",
+									SP2=B"10", SP3=B"11"); 		
+									
+	% automat obslugujacy szyne i sterujacy logika wydruku		%
+	AUT_BUS 	: machine of bits (QB[3..0])
+					with states (IDL=B"0000", 
+									CRA=B"0001",
+									CRB=B"0010",
+									ZA =B"0011",
+									ZB =B"0100", 
+									D2A=B"0101",
+									D2B=B"0110",
+									D1A=B"0111", 
+									D1B=B"1000",
+									D0A=B"1001",
+									D0B=B"1010",
+									LFA=B"1011",
+									LFB=B"1100",
+									WBU=B"1101");	
+BEGIN
+	% DEBUG %
+	V_BPRINT = BPRINT;
+	V_APRINT = APRINT;
+	V_CSTIME[] = CSTIME[];
+	
+	% podlaczenie przerzutnikow DFF i automatow					%
+	nWAIT_SYN.clk	= GEN;
+	nWAIT_SYN.clrn	= RESET;
+	nWAIT_SYN		= !WAIT_I;
+	LDATA[].clk		= GEN;
+	LDATA[].clrn	= RESET;
+	nSTROBE_SYN.clk	= GEN;
+	nSTROBE_SYN.clrn= RESET;
+	CSTIME[].clk	= GEN;
+	CSTIME[].clrn 	= RESET;
+	AUT_PRINT.clk 	= GEN;
+	AUT_PRINT.reset = !RESET;
+	AUT_BUS.clk 	= GEN;
+	AUT_BUS.reset 	= !RESET;
+	
+	% podlaczenie ukladu konwersji U2->ASCII(Z,D2,D1,D0)		%
+	U2A.U2I[] 		= DIN[];
+	Z[]				= U2A.Z[];
+	D2[]			= U2A.D2[];
+	D1[]			= U2A.D1[];
+	D0[]			= U2A.D0[];
+	
+	% podlaczenie linii komunikacji z laczem LPT				%
+	LDATASYN[]		= LDATA[];
+	BUSY 			= LSTAT[4];
+	
+	% !PError & nFault & Select									%
+	PRNT_OK			= !LSTAT[2] & LSTAT[1] & LSTAT[0];
+	PRN_READY		= PRNT_OK;
+	
+	% zapewnienie STROBE=VCC podczas startu i RESETu			%
+	nSTROBE_SYN		= !STROBE;	
+	
+	% nSelectIn=0, nInit=1, nAutoFd=1							%
+	LCTRL[]			= (1,1,1,1,0,1,1,!nSTROBE_SYN);
+	
+	% zdekodowanie rozkazu wyslania danych do LPT				%
+	if (A[]==dev_addr & IORQ==GND & WR==GND)
+		then BPRINT = VCC;
+		else BPRINT = GND;	end if;
+		
+	% wczytanie danych z szyny D[] 								%
+	TRI_DI[].oe 	= BPRINT;
+	TRI_DI[].in 	= D[];
+	DIN[] 			= TRI_DI[];
+		
+	% wystawienie sygnalu WAIT na szyne							%
+	--WT				= !nWAIT_SYN;
+	WT	 			= TRI(!nWAIT_SYN, BPRINT);	 % (in, oe) 	%
+	
+	% automat obslugujacy szyne i sterujacy logika wydruku		%
+	case AUT_BUS is
+		% oczekiwanie na dane z szyny %
+		when IDL => if (BPRINT==VCC)then	WAIT_I=GND; 
+							APRINT=VCC; LDATA[]=cr;  AUT_BUS=CRA;
+						else				WAIT_I=VCC; 
+							APRINT=GND; LDATA[]=cr;  AUT_BUS=IDL; 
+					end if;
+		% oczekiwanie na pojawienie sie !STROBE dla CR
+			- oznacza to, ze AUT_PRINT ruszyl, nie przeoczymy
+			tego sygnalu, bo trwa >1 takt zegara				%
+		when CRA => if (STROBE==GND)then	WAIT_I=GND; 
+							APRINT=GND; LDATA[]=cr;  AUT_BUS=CRB;
+						else				WAIT_I=GND;	
+							APRINT=VCC;	LDATA[]=cr;  AUT_BUS=CRA; 
+						end if;
+		% oczekiwanie na koniec wydruku	CR						%
+		when CRB => if (AUT_PRINT==SP0)then WAIT_I=GND; 
+							APRINT=VCC; LDATA[]=Z[]; AUT_BUS=ZA; 
+						else				WAIT_I=GND;	
+							APRINT=GND; LDATA[]=cr;  AUT_BUS=CRB; 
+						end if;
+		% oczekiwanie na start wydruku Z %
+		when ZA => if (STROBE==GND)then		WAIT_I=GND; 
+							APRINT=GND; LDATA[]=Z[]; AUT_BUS=ZB; 
+						else				WAIT_I=GND;	
+							APRINT=VCC;	LDATA[]=Z[]; AUT_BUS=ZA;  
+						end if;
+		% oczekiwanie na koniec wydruku	Z						%
+		when ZB => if (AUT_PRINT==SP0)then 	WAIT_I=GND; 
+							APRINT=VCC; LDATA[]=D2[];AUT_BUS=D2A;
+						else				WAIT_I=GND;	
+							APRINT=GND; LDATA[]=Z[]; AUT_BUS=ZB;  
+						end if;
+		% oczekiwanie na start druku D2							%
+		when D2A => if (STROBE==GND)then	WAIT_I=GND; 
+							APRINT=GND; LDATA[]=D2[];AUT_BUS=D2B;
+						else				WAIT_I=GND;	
+							APRINT=VCC;	LDATA[]=D2[];AUT_BUS=D2A; 
+						end if;
+		% oczekiwanie na koniec wydruku	D2						%
+		when D2B => if (AUT_PRINT==SP0)then WAIT_I=GND; 
+							APRINT=VCC; LDATA[]=D1[];AUT_BUS=D1A;
+						else				WAIT_I=GND;	
+							APRINT=GND; LDATA[]=D2[];AUT_BUS=D2B; 
+						end if;
+		% oczekiwanie na start druku D1							%
+		when D1A => if (STROBE==GND)then	WAIT_I=GND; 
+							APRINT=GND; LDATA[]=D1[];AUT_BUS=D1B;
+						else				WAIT_I=GND;	
+							APRINT=VCC;	LDATA[]=D1[];AUT_BUS=D1A; 
+						end if;
+		% oczekiwanie na koniec wydruku	D1						%
+		when D1B => if (AUT_PRINT==SP0)then WAIT_I=GND; 
+							APRINT=VCC; LDATA[]=D0[];AUT_BUS=D0A;
+						else				WAIT_I=GND;	
+							APRINT=GND; LDATA[]=D1[];AUT_BUS=D1B; 
+						end if;
+		% oczekiwanie na start druku D0							%
+		when D0A => if (STROBE==GND)then	WAIT_I=GND;
+							APRINT=GND; LDATA[]=D0[];AUT_BUS=D0B;
+						else				WAIT_I=GND;	
+							APRINT=VCC;	LDATA[]=D0[];AUT_BUS=D0A; 
+						end if;
+		% oczekiwanie na koniec wydruku	D0						%
+		when D0B => if (AUT_PRINT==SP0)then WAIT_I=GND; 
+							APRINT=VCC; LDATA[]=lf;  AUT_BUS=LFA;
+						else				WAIT_I=GND;	
+							APRINT=GND; LDATA[]=D0[];AUT_BUS=D0B; 
+						end if;
+		% oczekiwanie na start druku LF							%
+		when LFA => if (STROBE==GND)then	WAIT_I=GND; 
+							APRINT=GND; LDATA[]=lf;  AUT_BUS=LFB;
+						else				WAIT_I=GND;
+							APRINT=VCC;	LDATA[]=lf;  AUT_BUS=LFA; 
+						end if;
+		% oczekiwanie na koniec wydruku	LF						%
+		when LFB => if (AUT_PRINT==SP0)then WAIT_I=VCC; 
+							APRINT=GND; LDATA[]=Z[]; AUT_BUS=WBU;
+						else				WAIT_I=GND;	
+							APRINT=GND; LDATA[]=lf;  AUT_BUS=LFB; 
+						end if;
+		% oczekiwanie na wycofanie sie z szyny pol. druku		%
+		when WBU => if (BPRINT==GND)then	WAIT_I=VCC; 
+							APRINT=GND; LDATA[]=Z[]; AUT_BUS=IDL;
+						else				WAIT_I=VCC;	
+							APRINT=GND;	LDATA[]=Z[]; AUT_BUS=WBU; 
+						end if;
+	end case;
+	
+	% automat obslugujacy wydruk pojedynczego znaku				%
+	case AUT_PRINT is
+		% oczekiwanie na polecenie druku						%
+		when SP0 => if (APRINT==VCC) then	
+							STROBE=VCC; AUT_PRINT=SP1;
+						else				
+							STROBE=VCC; AUT_PRINT=SP0; end if;
+		% sprawdzenie stanu linii BUSY 							%
+		when SP1 => if (BUSY==GND) 	then	
+							STROBE=GND; AUT_PRINT=SP2;
+						else				
+							STROBE=VCC; AUT_PRINT=SP1; end if;
+		% wystawienie !STROBE na czas strobe_time				%
+		when SP2 => if (CSTIME[]==strobe_time) then 
+							STROBE=VCC; AUT_PRINT=SP3;
+						else 				
+							STROBE=GND; AUT_PRINT=SP2;
+							if (CSTIME[] < strobe_time) then 
+								CSTIME[]=CSTIME[]+1;
+							else 						
+								CSTIME[]=CSTIME[]; 
+							end if; end if;
+		% zaczekanie na BUSY = L								%
+		when SP3 => if (BUSY==GND) 	then	
+							STROBE=VCC; AUT_PRINT=SP0;
+						else				
+							STROBE=VCC; AUT_PRINT=SP3; end if;
+	end case;
+	
+END;
