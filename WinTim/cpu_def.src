@@ -15,23 +15,23 @@ LINES	 50
 LL:		EQU	B#0		; prefix 0 (for all commands except Rd = Ra * Rb)
 LH:		EQU	B#1		; prefix 1 (for Rd = Ra * Rb)
 
-LSTOP:		EQU	H#F
-LJORG:		EQU	H#0		; jump to 0
-LJZ:		EQU	H#1		; jump to A if Rd == 0
-LJMP:		EQU	H#2
-LMOVR:		EQU	H#3		; Rd = Ra
-LADD:		EQU	H#4
-LSUB:		EQU	H#5
-LOR:		EQU	H#6
-LAND:		EQU	H#7
-LLWR:		EQU	H#8		; Rd = RAM(Ra.Rb)
-LSWR:		EQU	H#9		; RAM(Ra.Rb) = Rd
-LLWI:		EQU	H#A		; Rd = RAM(A)
-LSWI:		EQU	H#B		; RAM(A) = Rd
-LIN:		EQU	H#C
-LOUT:		EQU	H#D
-LMOVI:		EQU	H#E		; Rd = DI
-LMUL:		EQU	H#E		; Rd = Ra * Rb
+LSTOP:		EQU	4H#F
+LJORG:		EQU	4H#0		; jump to 0
+LJZ:		EQU	4H#1		; jump to A if Rd == 0
+LJMP:		EQU	4H#2
+LMOVR:		EQU	4H#3		; Rd = Ra
+LADD:		EQU	4H#4
+LSUB:		EQU	4H#5
+LOR:		EQU	4H#6
+LAND:		EQU	4H#7
+LLWR:		EQU	4H#8		; Rd = RAM(Ra.Rb)
+LSWR:		EQU	4H#9		; RAM(Ra.Rb) = Rd
+LLWI:		EQU	4H#A		; Rd = RAM(A)
+LSWI:		EQU	4H#B		; RAM(A) = Rd
+LIN:		EQU	4H#C
+LOUT:		EQU	4H#D
+LMOVI:		EQU	4H#E		; Rd = DI
+LMUL:		EQU	4H#E		; Rd = Ra * Rb
 
 ;**********************************************************************
 ; INSTRUCTION FIELDS DEFINITIONS
@@ -39,13 +39,13 @@ LMUL:		EQU	H#E		; Rd = Ra * Rb
 Rd:		SUB	3VB#000	; destination register
 Ra:		SUB	3VB#000	; first source register
 Rb:		SUB	3VB#000	; second source register
-DI8:		SUB	2VH#00	; 8-bit immediate
-A8:		SUB	2VH#00	; 8-bit address
-A16:		SUB	4VH#0000	; 16-bit address
+DI8:		SUB	8VH#00	; 8-bit immediate
+A8:		SUB	8VH#00	; 8-bit address
+A16:		SUB	16VH#0000	; 16-bit address
 
-Z1:		EQU	1B#0		; const 0
-Z3:		EQU	3B#000	; const 000
-Z4:		EQU	1H#0		; const 0000
+Z1:		EQU	B#0		; const 0
+Z3:		EQU	B#000		; const 000
+Z4:		EQU	4H#0		; const 0000
 
 ;**********************************************************************
 ; DATA PSEUDO OPS
