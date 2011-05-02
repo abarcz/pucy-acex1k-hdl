@@ -1,0 +1,42 @@
+TITLE	FPGA-CPU TEST PROGRAM
+LINES	50						; program length
+LIST	F, B, W					; parameters for .LST
+FORM 	11111B111B1111B1111B11111111	; format for .LST binary code output (5-3-4-4-8)
+
+;*********************************
+; MACROS
+;*********************************
+
+;*********************************
+; CONSTANTS
+;*********************************
+
+;*********************************
+; PROGRAM AREA
+;*********************************
+	ORG H#00
+START:	STOP
+	JORG
+	JZ		R5,THERE%:
+	JMP	FINE%:
+	MOVR	R0, R7
+	ADDA	R3,R2,R1
+	SUBA	R4,R5,R6
+THERE:	OR		R7,R1,R2
+	AND	R7,R2,R3
+	LWR	R6,R4,R5
+	SWR	R6,R4,R5
+	LWI	R7, H#FFFF
+	SWI	R4, H#0102
+	IN		R5, H#10
+	OUT	R6, H#FF
+	MOVI	R6, H#EE
+FINE:	MUL	R5,R4,R2
+	
+
+
+;********************************
+; DATA FOR TEST PROGRAM
+;********************************
+
+END

@@ -1,0 +1,13 @@
+﻿How to write a program using WinTim for our CPU:
+
+1. load to WinTim and assemble the definitions file: cpu_def.src
+2. create a new src file for your assembly code, the easiest way to do it is to copy the cpu_asm.src file
+3. after assembling your src file (using the assembled definitions), you can see if the binary results are correct, generating a .lst file
+4. generate a .mif file
+5. change in the .mif file:
+	- width to 8bit
+	- depth to 90
+	- addresses of instructions, accordingly to their sizes (remember, addresses are given in words, in this case 8bit-words)
+6. finally, change the blank space initializing command to:
+	- "[xx..59]: 00;", where xx is the first free address after the last instruction (remember the instruction sizes)
+7. if Quartus compilation report gives no "address rewritten" and no "address uninitialized" errors, the file is OK.
