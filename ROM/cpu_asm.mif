@@ -1,0 +1,31 @@
+-- FPGA-CPU TEST PROGRAM
+-- Altera Instruction Memory Initialization File
+Depth = 90;
+Width = 8;
+Address_radix = HEX;
+Data_radix = HEX;
+Content
+Begin
+-- Use NOPS for default instruction memory values
+    [22..59]: 00; -- nop
+-- Place MIPS Instructions here
+-- Note: memory addresses are in words and not bytes
+-- i.e. next location is +1 and not +4
+    00: 78;   -- START:	STOP
+    01: 00;   -- 	JORG
+    02: 0D 07;   -- 	JZ		R5,THERE%:
+    04: 10 10;   -- 	JMP	FINE%:
+    06: 18 70;   -- 	MOVR	R0, R7
+    08: 23 21;   -- 	ADDA	R3,R2,R1
+    0A: 2C 56;   -- 	SUBA	R4,R5,R6
+    0C: 37 12;   -- THERE:	OR		R7,R1,R2
+    0E: 3F 23;   -- 	AND	R7,R2,R3
+    10: 46 45;   -- 	LWR	R6,R4,R5
+    12: 4E 45;   -- 	SWR	R6,R4,R5
+    14: 57 FF FF;   -- 	LWI	R7, H#FFFF
+    17: 5C 01 02;   -- 	SWI	R4, H#0102
+    1A: 65 10;   -- 	IN		R5, H#10
+    1C: 6E FF;   -- 	OUT	R6, H#FF
+    1E: 76 EE;   -- 	MOVI	R6, H#EE
+    20: F5 42;   -- FINE:	MUL	R5,R4,R2
+End;
