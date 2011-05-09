@@ -17,10 +17,10 @@ entity Microcontroller is
 				--OUT_MRQ, OUT_IORQ, OUT_RD, OUT_WR : out std_logic;
 				
 				-- debug
-				V_A		: in std_logic_vector(15 downto 0);
+				V_A		: inout std_logic_vector(15 downto 0);
 				VI_D	: inout std_logic_vector(7 downto 0);
 				VO_D	: out std_logic_vector(7 downto 0);
-				V_MRQ, V_IORQ, V_RD, V_WR : in std_logic;
+				V_MRQ, V_IORQ, V_RD, V_WR : inout std_logic;
 				V_WT	: out std_logic;
 				
 				-- sygnaly WE / WY
@@ -47,12 +47,28 @@ architecture arch_Microcontroller of Microcontroller is
 	signal B_MRQ, B_IORQ, B_RD, B_WR, B_WT : std_logic;
 	signal RESET		: std_logic;
 	
+	signal WAIT_CPU		: std_logic;
+	
 	-- sygnal z PS2 sygnalizujacy ilosc wczytanych kodow
 	signal PS2_KEYNUM	: std_logic_vector(7 downto 0);
 	
 	-- sygnal z LPT sygnalizujacy gotowosc drukarki
 	signal LPT_READY	: std_logic;
 	
+	component CPU is
+		port (
+			GEN			:	in std_logic;							-- Clock
+			RESET		:	in std_logic;							-- Reset
+			ADDR		:	out std_logic_vector (15 downto 0);		-- Address bus
+			DATA		:	inout std_logic_vector (7 downto 0);	-- Data bus
+			MREQ		:	out std_logic;							-- Memory request
+			IORQ		:	out std_logic;							-- I/O request
+			WR			: 	out std_logic;							-- Write enable
+			RD			:	out std_logic;							-- Read enable
+			WT			:	inout std_logic;						-- Wait bus
+			WAIT_CPU	: 	out std_logic							-- Wait cpu
+			);
+	end component CPU;
 	
 	component ROM is
 		port (	A	: in std_logic_vector (15 downto 0);
@@ -103,6 +119,7 @@ architecture arch_Microcontroller of Microcontroller is
 		--OUT_A <= B_A; OUT_D <= B_D;
 		--OUT_MRQ <= B_MRQ; OUT_IORQ <= B_IORQ; OUT_RD <= B_RD; OUT_WR <= B_WR;
 		
+		-- :TODO: do podzespolow powinny dochodzic tylko sygnaly B_x, nie V_x!
 		-- debug
 		B_A <= V_A; 
 		B_D <= VI_D; -- :TODO: B_D nieuzywane, uzyte VI_D!
@@ -115,14 +132,16 @@ architecture arch_Microcontroller of Microcontroller is
 		-- sygnalizacja na diodach
 		L_A			<= (LPT_READY & B_WT & "111" & PS2_KEYNUM(2 downto 0));
 		L_B			<= VI_D; -- :TODO: powinno byc B_D
+		
+	e9: CPU port map (GEN, RESET, V_A, VI_D, V_MRQ, V_IORQ, V_WR, V_RD, B_WT, WAIT_CPU);
 	
-	e0: ROM port map (B_A, VI_D, B_MRQ, B_RD);
+	e0: ROM port map (V_A, VI_D, V_MRQ, V_RD);
 	
-	e1: RAM port map (B_A, VI_D, B_MRQ, B_RD, B_WR);
+	e1: RAM port map (V_A, VI_D, V_MRQ, V_RD, V_WR);
 	
-	e2: LPT_OUT port map (GEN, RESET, B_A(7 downto 0), VI_D, B_IORQ, B_WR, B_WT, 
+	e2: LPT_OUT port map (GEN, RESET, V_A(7 downto 0), VI_D, V_IORQ, V_WR, B_WT, 
 							LPT_READY, P_3, P_2, P_1);
 							
-	e3:	PS2_IN port map (GEN, RESET, B_A(7 downto 0), B_D, B_WT, B_IORQ, B_RD, PS2_KEYNUM, P_4);
+	e3:	PS2_IN port map (GEN, RESET, V_A(7 downto 0), B_D, B_WT, V_IORQ, V_RD, PS2_KEYNUM, P_4);
 	
 end architecture arch_Microcontroller;
