@@ -1,0 +1,472 @@
+Analysis & Synthesis report for CPU
+Mon May 09 04:35:24 2011
+Quartus II Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Analysis & Synthesis Summary
+  3. Analysis & Synthesis Settings
+  4. Analysis & Synthesis Source Files Read
+  5. Analysis & Synthesis Resource Usage Summary
+  6. Analysis & Synthesis Resource Utilization by Entity
+  7. Registers Removed During Synthesis
+  8. General Register Statistics
+  9. Inverted Register Statistics
+ 10. Source assignments for lpm_counter:REG_PC_rtl_0
+ 11. Parameter Settings for User Entity Instance: LPM_BUSTRI:e0
+ 12. Parameter Settings for User Entity Instance: LPM_RAM_DP:uni_reg_A
+ 13. Parameter Settings for User Entity Instance: LPM_RAM_DP:uni_reg_B
+ 14. Parameter Settings for Inferred Entity Instance: lpm_counter:REG_PC_rtl_0
+ 15. Analysis & Synthesis Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2009 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++----------------------------------------------------------------------------+
+; Analysis & Synthesis Summary                                               ;
++-----------------------------+----------------------------------------------+
+; Analysis & Synthesis Status ; Successful - Mon May 09 04:35:24 2011        ;
+; Quartus II Version          ; 9.0 Build 235 06/17/2009 SP 2 SJ Web Edition ;
+; Revision Name               ; CPU                                          ;
+; Top-level Entity Name       ; CPU                                          ;
+; Family                      ; ACEX1K                                       ;
+; Total logic elements        ; 51                                           ;
+; Total pins                  ; 55                                           ;
+; Total memory bits           ; 0                                            ;
+; Total PLLs                  ; 0                                            ;
++-----------------------------+----------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Settings                                                                ;
++--------------------------------------------------------------+---------------+---------------+
+; Option                                                       ; Setting       ; Default Value ;
++--------------------------------------------------------------+---------------+---------------+
+; Device                                                       ; EP1K30TC144-3 ;               ;
+; Top-level entity name                                        ; CPU           ; CPU           ;
+; Family name                                                  ; ACEX1K        ; Stratix II    ;
+; Use Generated Physical Constraints File                      ; Off           ;               ;
+; Use smart compilation                                        ; Off           ; Off           ;
+; Create Debugging Nodes for IP Cores                          ; Off           ; Off           ;
+; Preserve fewer node names                                    ; On            ; On            ;
+; Disable OpenCore Plus hardware evaluation                    ; Off           ; Off           ;
+; Verilog Version                                              ; Verilog_2001  ; Verilog_2001  ;
+; VHDL Version                                                 ; VHDL93        ; VHDL93        ;
+; State Machine Processing                                     ; Auto          ; Auto          ;
+; Safe State Machine                                           ; Off           ; Off           ;
+; Extract Verilog State Machines                               ; On            ; On            ;
+; Extract VHDL State Machines                                  ; On            ; On            ;
+; Ignore Verilog initial constructs                            ; Off           ; Off           ;
+; Iteration limit for constant Verilog loops                   ; 5000          ; 5000          ;
+; Iteration limit for non-constant Verilog loops               ; 250           ; 250           ;
+; Add Pass-Through Logic to Inferred RAMs                      ; On            ; On            ;
+; Parallel Synthesis                                           ; Off           ; Off           ;
+; NOT Gate Push-Back                                           ; On            ; On            ;
+; Power-Up Don't Care                                          ; On            ; On            ;
+; Remove Redundant Logic Cells                                 ; Off           ; Off           ;
+; Remove Duplicate Registers                                   ; On            ; On            ;
+; Ignore CARRY Buffers                                         ; Off           ; Off           ;
+; Ignore CASCADE Buffers                                       ; Off           ; Off           ;
+; Ignore GLOBAL Buffers                                        ; Off           ; Off           ;
+; Ignore ROW GLOBAL Buffers                                    ; Off           ; Off           ;
+; Ignore LCELL Buffers                                         ; Off           ; Off           ;
+; Ignore SOFT Buffers                                          ; On            ; On            ;
+; Limit AHDL Integers to 32 Bits                               ; Off           ; Off           ;
+; Auto Implement in ROM                                        ; Off           ; Off           ;
+; Optimization Technique                                       ; Area          ; Area          ;
+; Carry Chain Length                                           ; 32            ; 32            ;
+; Cascade Chain Length                                         ; 2             ; 2             ;
+; Auto Carry Chains                                            ; On            ; On            ;
+; Auto Open-Drain Pins                                         ; On            ; On            ;
+; Auto ROM Replacement                                         ; On            ; On            ;
+; Auto RAM Replacement                                         ; On            ; On            ;
+; Auto Clock Enable Replacement                                ; On            ; On            ;
+; Strict RAM Replacement                                       ; Off           ; Off           ;
+; Auto Resource Sharing                                        ; Off           ; Off           ;
+; Allow Any RAM Size For Recognition                           ; Off           ; Off           ;
+; Allow Any ROM Size For Recognition                           ; Off           ; Off           ;
+; Use LogicLock Constraints during Resource Balancing          ; On            ; On            ;
+; Ignore translate_off and synthesis_off directives            ; Off           ; Off           ;
+; Show Parameter Settings Tables in Synthesis Report           ; On            ; On            ;
+; HDL message level                                            ; Level2        ; Level2        ;
+; Suppress Register Optimization Related Messages              ; Off           ; Off           ;
+; Number of Removed Registers Reported in Synthesis Report     ; 100           ; 100           ;
+; Number of Inverted Registers Reported in Synthesis Report    ; 100           ; 100           ;
+; Block Design Naming                                          ; Auto          ; Auto          ;
+; Synthesis Effort                                             ; Auto          ; Auto          ;
+; Shift Register Replacement - Allow Asynchronous Clear Signal ; On            ; On            ;
+; Analysis & Synthesis Message Level                           ; Medium        ; Medium        ;
++--------------------------------------------------------------+---------------+---------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Source Files Read                                                                                                                       ;
++----------------------------------+-----------------+-----------------+---------------------------------------------------------------------------------------+
+; File Name with User-Entered Path ; Used in Netlist ; File Type       ; File Name with Absolute Path                                                          ;
++----------------------------------+-----------------+-----------------+---------------------------------------------------------------------------------------+
+; CPU.vhd                          ; yes             ; User VHDL File  ; d:/program files/altera/90sp2/quartus/CPU.vhd                                         ;
+; LPM_BUSTRI.tdf                   ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/LPM_BUSTRI.tdf          ;
+; LPM_RAM_DP.tdf                   ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/LPM_RAM_DP.tdf          ;
+; altdpram.inc                     ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/altdpram.inc            ;
+; lpm_mux.inc                      ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/lpm_mux.inc             ;
+; lpm_decode.inc                   ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/lpm_decode.inc          ;
+; aglobal90.inc                    ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/aglobal90.inc           ;
+; altdpram.tdf                     ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/altdpram.tdf            ;
+; memmodes.inc                     ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/others/maxplus2/memmodes.inc          ;
+; a_hdffe.inc                      ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/a_hdffe.inc             ;
+; a_rdenreg.inc                    ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/a_rdenreg.inc           ;
+; altqpram.inc                     ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/altqpram.inc            ;
+; alt_le_rden_reg.inc              ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/alt_le_rden_reg.inc     ;
+; altsyncram.inc                   ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/altsyncram.inc          ;
+; lpm_counter.tdf                  ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/lpm_counter.tdf         ;
+; lpm_constant.inc                 ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/lpm_constant.inc        ;
+; lpm_add_sub.inc                  ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/lpm_add_sub.inc         ;
+; cmpconst.inc                     ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/cmpconst.inc            ;
+; lpm_compare.inc                  ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/lpm_compare.inc         ;
+; lpm_counter.inc                  ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/lpm_counter.inc         ;
+; dffeea.inc                       ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/dffeea.inc              ;
+; alt_synch_counter.inc            ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/alt_synch_counter.inc   ;
+; alt_synch_counter_f.inc          ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/alt_synch_counter_f.inc ;
+; alt_counter_f10ke.inc            ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/alt_counter_f10ke.inc   ;
+; alt_counter_stratix.inc          ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/alt_counter_stratix.inc ;
+; alt_counter_f10ke.tdf            ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/alt_counter_f10ke.tdf   ;
+; flex10ke_lcell.inc               ; yes             ; Megafunction    ; d:/program files/altera/90sp2/quartus/libraries/megafunctions/flex10ke_lcell.inc      ;
++----------------------------------+-----------------+-----------------+---------------------------------------------------------------------------------------+
+
+
++---------------------------------------------+
+; Analysis & Synthesis Resource Usage Summary ;
++-----------------------------------+---------+
+; Resource                          ; Usage   ;
++-----------------------------------+---------+
+; Total logic elements              ; 51      ;
+; Total combinational functions     ; 51      ;
+;     -- Total 4-input functions    ; 10      ;
+;     -- Total 3-input functions    ; 8       ;
+;     -- Total 2-input functions    ; 32      ;
+;     -- Total 1-input functions    ; 1       ;
+;     -- Total 0-input functions    ; 0       ;
+; Total registers                   ; 42      ;
+; Total logic cells in carry chains ; 16      ;
+; I/O pins                          ; 55      ;
+; Maximum fan-out node              ; GEN     ;
+; Maximum fan-out                   ; 42      ;
+; Total fan-out                     ; 288     ;
+; Average fan-out                   ; 2.72    ;
++-----------------------------------+---------+
+
+
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Utilization by Entity                                                                                                                                                                                                         ;
++----------------------------------------+-------------+--------------+-------------+------+--------------+-------------------+------------------+-----------------+------------+--------------------------------------------------------------+--------------+
+; Compilation Hierarchy Node             ; Logic Cells ; LC Registers ; Memory Bits ; Pins ; LUT-Only LCs ; Register-Only LCs ; LUT/Register LCs ; Carry Chain LCs ; Packed LCs ; Full Hierarchy Name                                          ; Library Name ;
++----------------------------------------+-------------+--------------+-------------+------+--------------+-------------------+------------------+-----------------+------------+--------------------------------------------------------------+--------------+
+; |CPU                                   ; 51 (34)     ; 42           ; 0           ; 55   ; 9 (8)        ; 0 (0)             ; 42 (26)          ; 16 (0)          ; 0 (0)      ; |CPU                                                         ; work         ;
+;    |lpm_counter:REG_PC_rtl_0|          ; 17 (0)      ; 16           ; 0           ; 0    ; 1 (0)        ; 0 (0)             ; 16 (0)           ; 16 (0)          ; 0 (0)      ; |CPU|lpm_counter:REG_PC_rtl_0                                ; work         ;
+;       |alt_counter_f10ke:wysi_counter| ; 17 (17)     ; 16           ; 0           ; 0    ; 1 (1)        ; 0 (0)             ; 16 (16)          ; 16 (16)         ; 0 (0)      ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter ; work         ;
++----------------------------------------+-------------+--------------+-------------+------+--------------+-------------------+------------------+-----------------+------------+--------------------------------------------------------------+--------------+
+Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
+
+
++---------------------------------------------------------------------------------+
+; Registers Removed During Synthesis                                              ;
++----------------------------------------+----------------------------------------+
+; Register name                          ; Reason for Removal                     ;
++----------------------------------------+----------------------------------------+
+; REG_DATA[0..7]                         ; Stuck at GND due to stuck port data_in ;
+; SIG_IORQ                               ; Stuck at VCC due to stuck port data_in ;
+; SIG_WR                                 ; Stuck at VCC due to stuck port data_in ;
+; REG_CMD[8..15]                         ; Stuck at GND due to stuck port data_in ;
+; AUT_CPU[2..4]                          ; Stuck at GND due to stuck port data_in ;
+; SIG_RD                                 ; Merged with SIG_MREQ                   ;
+; Total Number of Removed Registers = 22 ;                                        ;
++----------------------------------------+----------------------------------------+
+
+
++------------------------------------------------------+
+; General Register Statistics                          ;
++----------------------------------------------+-------+
+; Statistic                                    ; Value ;
++----------------------------------------------+-------+
+; Total registers                              ; 42    ;
+; Number of registers using Synchronous Clear  ; 16    ;
+; Number of registers using Synchronous Load   ; 0     ;
+; Number of registers using Asynchronous Clear ; 42    ;
+; Number of registers using Asynchronous Load  ; 0     ;
+; Number of registers using Clock Enable       ; 37    ;
+; Number of registers using Preset             ; 0     ;
++----------------------------------------------+-------+
+
+
++--------------------------------------------------+
+; Inverted Register Statistics                     ;
++----------------------------------------+---------+
+; Inverted Register                      ; Fan out ;
++----------------------------------------+---------+
+; SIG_MREQ                               ; 8       ;
+; Total number of inverted registers = 1 ;         ;
++----------------------------------------+---------+
+
+
++-------------------------------------------------+
+; Source assignments for lpm_counter:REG_PC_rtl_0 ;
++---------------------------+-------+------+------+
+; Assignment                ; Value ; From ; To   ;
++---------------------------+-------+------+------+
+; SUPPRESS_DA_RULE_INTERNAL ; a101  ; -    ; -    ;
+; SUPPRESS_DA_RULE_INTERNAL ; s102  ; -    ; -    ;
+; SUPPRESS_DA_RULE_INTERNAL ; s103  ; -    ; -    ;
++---------------------------+-------+------+------+
+
+
++------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: LPM_BUSTRI:e0 ;
++----------------+-------+-----------------------------------+
+; Parameter Name ; Value ; Type                              ;
++----------------+-------+-----------------------------------+
+; LPM_WIDTH      ; 8     ; Signed Integer                    ;
++----------------+-------+-----------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: LPM_RAM_DP:uni_reg_A ;
++------------------------+--------------+---------------------------+
+; Parameter Name         ; Value        ; Type                      ;
++------------------------+--------------+---------------------------+
+; WIDTH_BYTEENA          ; 1            ; Untyped                   ;
+; LPM_WIDTH              ; 8            ; Signed Integer            ;
+; LPM_WIDTHAD            ; 3            ; Signed Integer            ;
+; LPM_NUMWORDS           ; 8            ; Signed Integer            ;
+; LPM_INDATA             ; REGISTERED   ; Untyped                   ;
+; LPM_RDADDRESS_CONTROL  ; UNREGISTERED ; Untyped                   ;
+; LPM_WRADDRESS_CONTROL  ; UNREGISTERED ; Untyped                   ;
+; LPM_OUTDATA            ; UNREGISTERED ; Untyped                   ;
+; LPM_FILE               ; UNUSED       ; Untyped                   ;
+; USE_EAB                ; ON           ; Untyped                   ;
+; DEVICE_FAMILY          ; ACEX1K       ; Untyped                   ;
+; AUTO_CARRY_CHAINS      ; ON           ; AUTO_CARRY                ;
+; IGNORE_CARRY_BUFFERS   ; OFF          ; IGNORE_CARRY              ;
+; AUTO_CASCADE_CHAINS    ; ON           ; AUTO_CASCADE              ;
+; IGNORE_CASCADE_BUFFERS ; OFF          ; IGNORE_CASCADE            ;
++------------------------+--------------+---------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: LPM_RAM_DP:uni_reg_B ;
++------------------------+--------------+---------------------------+
+; Parameter Name         ; Value        ; Type                      ;
++------------------------+--------------+---------------------------+
+; WIDTH_BYTEENA          ; 1            ; Untyped                   ;
+; LPM_WIDTH              ; 8            ; Signed Integer            ;
+; LPM_WIDTHAD            ; 3            ; Signed Integer            ;
+; LPM_NUMWORDS           ; 8            ; Signed Integer            ;
+; LPM_INDATA             ; REGISTERED   ; Untyped                   ;
+; LPM_RDADDRESS_CONTROL  ; UNREGISTERED ; Untyped                   ;
+; LPM_WRADDRESS_CONTROL  ; UNREGISTERED ; Untyped                   ;
+; LPM_OUTDATA            ; UNREGISTERED ; Untyped                   ;
+; LPM_FILE               ; UNUSED       ; Untyped                   ;
+; USE_EAB                ; ON           ; Untyped                   ;
+; DEVICE_FAMILY          ; ACEX1K       ; Untyped                   ;
+; AUTO_CARRY_CHAINS      ; ON           ; AUTO_CARRY                ;
+; IGNORE_CARRY_BUFFERS   ; OFF          ; IGNORE_CARRY              ;
+; AUTO_CASCADE_CHAINS    ; ON           ; AUTO_CASCADE              ;
+; IGNORE_CASCADE_BUFFERS ; OFF          ; IGNORE_CASCADE            ;
++------------------------+--------------+---------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++---------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: lpm_counter:REG_PC_rtl_0 ;
++------------------------+-------------------+------------------------------+
+; Parameter Name         ; Value             ; Type                         ;
++------------------------+-------------------+------------------------------+
+; AUTO_CARRY_CHAINS      ; ON                ; AUTO_CARRY                   ;
+; IGNORE_CARRY_BUFFERS   ; OFF               ; IGNORE_CARRY                 ;
+; AUTO_CASCADE_CHAINS    ; ON                ; AUTO_CASCADE                 ;
+; IGNORE_CASCADE_BUFFERS ; OFF               ; IGNORE_CASCADE               ;
+; LPM_WIDTH              ; 16                ; Untyped                      ;
+; LPM_DIRECTION          ; UP                ; Untyped                      ;
+; LPM_MODULUS            ; 0                 ; Untyped                      ;
+; LPM_AVALUE             ; UNUSED            ; Untyped                      ;
+; LPM_SVALUE             ; UNUSED            ; Untyped                      ;
+; LPM_PORT_UPDOWN        ; PORT_CONNECTIVITY ; Untyped                      ;
+; DEVICE_FAMILY          ; ACEX1K            ; Untyped                      ;
+; CARRY_CHAIN            ; MANUAL            ; Untyped                      ;
+; CARRY_CHAIN_LENGTH     ; 48                ; CARRY_CHAIN_LENGTH           ;
+; NOT_GATE_PUSH_BACK     ; ON                ; NOT_GATE_PUSH_BACK           ;
+; CARRY_CNT_EN           ; SMART             ; Untyped                      ;
+; LABWIDE_SCLR           ; ON                ; Untyped                      ;
+; USE_NEW_VERSION        ; TRUE              ; Untyped                      ;
+; CBXI_PARAMETER         ; NOTHING           ; Untyped                      ;
++------------------------+-------------------+------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings Tables in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-------------------------------+
+; Analysis & Synthesis Messages ;
++-------------------------------+
+Info: *******************************************************************
+Info: Running Quartus II Analysis & Synthesis
+    Info: Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
+    Info: Processing started: Mon May 09 04:35:21 2011
+Info: Command: quartus_map --read_settings_files=on --write_settings_files=off CPU -c CPU
+Info: Found 2 design units, including 1 entities, in source file CPU.vhd
+    Info: Found design unit 1: CPU-CPU_module
+    Info: Found entity 1: CPU
+Info: Elaborating entity "CPU" for the top level hierarchy
+Warning (10541): VHDL Signal Declaration warning at CPU.vhd(82): used implicit default value for signal "ADDR_REG_A" because signal was never assigned a value or an explicit default value. Use of implicit default value may introduce unintended design optimizations.
+Warning (10541): VHDL Signal Declaration warning at CPU.vhd(83): used implicit default value for signal "ADDR_REG_B" because signal was never assigned a value or an explicit default value. Use of implicit default value may introduce unintended design optimizations.
+Warning (10541): VHDL Signal Declaration warning at CPU.vhd(84): used implicit default value for signal "ADDR_REG_ACC" because signal was never assigned a value or an explicit default value. Use of implicit default value may introduce unintended design optimizations.
+Warning (10492): VHDL Process Statement warning at CPU.vhd(168): signal "REG_A" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(175): signal "REG_A" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(175): signal "REG_B" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(176): signal "REG_ACCx" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(183): signal "REG_A" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(183): signal "REG_B" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(184): signal "REG_ACCx" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(191): signal "REG_A" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(191): signal "REG_B" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(198): signal "REG_A" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(198): signal "REG_B" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10631): VHDL Process Statement warning at CPU.vhd(94): inferring latch(es) for signal or variable "AUT_CPUn", which holds its previous value in one or more paths through the process
+Warning (10631): VHDL Process Statement warning at CPU.vhd(94): inferring latch(es) for signal or variable "REG_ACC", which holds its previous value in one or more paths through the process
+Warning (10631): VHDL Process Statement warning at CPU.vhd(94): inferring latch(es) for signal or variable "REG_ACC_EN", which holds its previous value in one or more paths through the process
+Warning (10631): VHDL Process Statement warning at CPU.vhd(94): inferring latch(es) for signal or variable "REG_ACCx", which holds its previous value in one or more paths through the process
+Warning (10492): VHDL Process Statement warning at CPU.vhd(275): signal "REG_ADDR" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(277): signal "SIG_WAIT" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(287): signal "REG_ADDRESS" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(294): signal "SIG_IS_MEM" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(300): signal "SIG_IS_RD" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(308): signal "SIG_MREQ" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(309): signal "SIG_IORQ" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(310): signal "SIG_RD" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(311): signal "SIG_WR" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Warning (10492): VHDL Process Statement warning at CPU.vhd(313): signal "SIG_WAIT" is read inside the Process Statement but isn't in the Process Statement's sensitivity list
+Info (10041): Inferred latch for "REG_ACCx[0]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACCx[1]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACCx[2]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACCx[3]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACCx[4]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACCx[5]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACCx[6]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACCx[7]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACC_EN" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACC[0]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACC[1]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACC[2]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACC[3]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACC[4]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACC[5]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACC[6]" at CPU.vhd(94)
+Info (10041): Inferred latch for "REG_ACC[7]" at CPU.vhd(94)
+Info (10041): Inferred latch for "AUT_CPUn[0]" at CPU.vhd(94)
+Info (10041): Inferred latch for "AUT_CPUn[1]" at CPU.vhd(94)
+Info (10041): Inferred latch for "AUT_CPUn[2]" at CPU.vhd(94)
+Info (10041): Inferred latch for "AUT_CPUn[3]" at CPU.vhd(94)
+Info (10041): Inferred latch for "AUT_CPUn[4]" at CPU.vhd(94)
+Info: Elaborating entity "LPM_BUSTRI" for hierarchy "LPM_BUSTRI:e0"
+Info: Elaborated megafunction instantiation "LPM_BUSTRI:e0"
+Info: Instantiated megafunction "LPM_BUSTRI:e0" with the following parameter:
+    Info: Parameter "LPM_WIDTH" = "8"
+    Info: Parameter "LPM_TYPE" = "LPM_BUSTRI"
+    Info: Parameter "LPM_HINT" = "UNUSED"
+Info: Elaborating entity "LPM_RAM_DP" for hierarchy "LPM_RAM_DP:uni_reg_A"
+Info: Elaborated megafunction instantiation "LPM_RAM_DP:uni_reg_A"
+Info: Instantiated megafunction "LPM_RAM_DP:uni_reg_A" with the following parameter:
+    Info: Parameter "LPM_WIDTH" = "8"
+    Info: Parameter "LPM_WIDTHAD" = "3"
+    Info: Parameter "LPM_NUMWORDS" = "8"
+    Info: Parameter "LPM_INDATA" = "REGISTERED"
+    Info: Parameter "LPM_OUTDATA" = "UNREGISTERED"
+    Info: Parameter "LPM_RDADDRESS_CONTROL" = "UNREGISTERED"
+    Info: Parameter "LPM_WRADDRESS_CONTROL" = "UNREGISTERED"
+    Info: Parameter "LPM_FILE" = "UNUSED"
+    Info: Parameter "LPM_TYPE" = "LPM_RAM_DP"
+    Info: Parameter "USE_EAB" = "ON"
+    Info: Parameter "INTENDED_DEVICE_FAMILY" = "UNUSED"
+    Info: Parameter "RDEN_USED" = "TRUE"
+    Info: Parameter "LPM_HINT" = "UNUSED"
+Info: Elaborating entity "altdpram" for hierarchy "LPM_RAM_DP:uni_reg_A|altdpram:sram"
+Info: Elaborated megafunction instantiation "LPM_RAM_DP:uni_reg_A|altdpram:sram", which is child of megafunction instantiation "LPM_RAM_DP:uni_reg_A"
+Warning: Synthesized away the following node(s):
+    Warning: Synthesized away the following RAM node(s):
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_B|altdpram:sram|q[7]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_B|altdpram:sram|q[6]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_B|altdpram:sram|q[5]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_B|altdpram:sram|q[4]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_B|altdpram:sram|q[3]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_B|altdpram:sram|q[2]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_B|altdpram:sram|q[1]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_B|altdpram:sram|q[0]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_A|altdpram:sram|q[7]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_A|altdpram:sram|q[6]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_A|altdpram:sram|q[5]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_A|altdpram:sram|q[4]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_A|altdpram:sram|q[3]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_A|altdpram:sram|q[2]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_A|altdpram:sram|q[1]"
+        Warning (14320): Synthesized away node "lpm_ram_dp:uni_reg_A|altdpram:sram|q[0]"
+Warning: LATCH primitive "AUT_CPUn[0]" is permanently enabled
+Warning: LATCH primitive "AUT_CPUn[1]" is permanently enabled
+Info: Inferred 1 megafunctions from design logic
+    Info: Inferred lpm_counter megafunction (LPM_WIDTH=16) from the following logic: "REG_PC[0]~0"
+Info: Elaborated megafunction instantiation "lpm_counter:REG_PC_rtl_0"
+Info: Instantiated megafunction "lpm_counter:REG_PC_rtl_0" with the following parameter:
+    Info: Parameter "LPM_WIDTH" = "16"
+    Info: Parameter "LPM_DIRECTION" = "UP"
+    Info: Parameter "LPM_TYPE" = "LPM_COUNTER"
+Info: Elaborated megafunction instantiation "lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter", which is child of megafunction instantiation "lpm_counter:REG_PC_rtl_0"
+Warning: The following bidir pins have no drivers
+    Warning: Bidir "WT" has no driver
+Warning: Always-enabled tri-state buffer(s) removed
+    Warning: Converted the fanout from the always-enabled tri-state buffer "e1" to the node "WAIT_CPU" into a wire
+    Warning: Converted the fanout from the always-enabled tri-state buffer "e1" to the node "Mux68" into a wire
+Warning: Tri-state node(s) do not directly drive top-level pin(s)
+    Warning: Converted the fan-out from the tri-state buffer "lpm_bustri:e0|din[7]" to the node "Mux21" into an OR gate
+    Warning: Converted the fan-out from the tri-state buffer "lpm_bustri:e0|din[6]" to the node "Mux22" into an OR gate
+    Warning: Converted the fan-out from the tri-state buffer "lpm_bustri:e0|din[5]" to the node "Mux23" into an OR gate
+    Warning: Converted the fan-out from the tri-state buffer "lpm_bustri:e0|din[4]" to the node "Mux24" into an OR gate
+    Warning: Converted the fan-out from the tri-state buffer "lpm_bustri:e0|din[3]" to the node "Mux25" into an OR gate
+Warning: Output pins are stuck at VCC or GND
+    Warning (13410): Pin "IORQ" is stuck at VCC
+    Warning (13410): Pin "WR" is stuck at VCC
+    Warning (13410): Pin "D_AUT_CPU[2]" is stuck at GND
+    Warning (13410): Pin "D_AUT_CPU[3]" is stuck at GND
+    Warning (13410): Pin "D_AUT_CPU[4]" is stuck at GND
+Warning: Output pin "WAIT_CPU" driven by bidirectional pin "WT" cannot be tri-stated
+Info: Registers with preset signals will power-up high
+Info: Implemented 106 device resources after synthesis - the final resource count might be different
+    Info: Implemented 2 input pins
+    Info: Implemented 44 output pins
+    Info: Implemented 9 bidirectional pins
+    Info: Implemented 51 logic cells
+Info: Quartus II Analysis & Synthesis was successful. 0 errors, 66 warnings
+    Info: Peak virtual memory: 195 megabytes
+    Info: Processing ended: Mon May 09 04:35:24 2011
+    Info: Elapsed time: 00:00:03
+    Info: Total CPU time (on all processors): 00:00:03
+
+
