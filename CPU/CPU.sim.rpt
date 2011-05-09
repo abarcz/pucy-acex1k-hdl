@@ -1,0 +1,358 @@
+Simulator report for CPU
+Sun May 08 17:37:11 2011
+Quartus II Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Simulator Summary
+  3. Simulator Settings
+  4. Simulation Waveforms
+  5. Coverage Summary
+  6. Complete 1/0-Value Coverage
+  7. Missing 1-Value Coverage
+  8. Missing 0-Value Coverage
+  9. Simulator INI Usage
+ 10. Simulator Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 1991-2009 Altera Corporation
+Your use of Altera Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Altera Program License 
+Subscription Agreement, Altera MegaCore Function License 
+Agreement, or other applicable license agreement, including, 
+without limitation, that your use is for the sole purpose of 
+programming logic devices manufactured by Altera and sold by 
+Altera or its authorized distributors.  Please refer to the 
+applicable agreement for further details.
+
+
+
++---------------------------------------------+
+; Simulator Summary                           ;
++-----------------------------+---------------+
+; Type                        ; Value         ;
++-----------------------------+---------------+
+; Simulation Start Time       ; 0 ps          ;
+; Simulation End Time         ; 10.0 us       ;
+; Simulation Netlist Size     ; 115 nodes     ;
+; Simulation Coverage         ;      43.20 %  ;
+; Total Number of Transitions ; 5041          ;
+; Simulation Breakpoints      ; 0             ;
+; Family                      ; ACEX1K        ;
+; Device                      ; EP1K30TC144-3 ;
++-----------------------------+---------------+
+
+
++-------------------------------------------------------------------------------------------------------------------------+
+; Simulator Settings                                                                                                      ;
++--------------------------------------------------------------------------------------------+------------+---------------+
+; Option                                                                                     ; Setting    ; Default Value ;
++--------------------------------------------------------------------------------------------+------------+---------------+
+; Simulation mode                                                                            ; Timing     ; Timing        ;
+; Start time                                                                                 ; 0 ns       ; 0 ns          ;
+; Simulation results format                                                                  ; CVWF       ;               ;
+; Add pins automatically to simulation output waveforms                                      ; On         ; On            ;
+; Check outputs                                                                              ; Off        ; Off           ;
+; Report simulation coverage                                                                 ; On         ; On            ;
+; Display complete 1/0 value coverage report                                                 ; On         ; On            ;
+; Display missing 1-value coverage report                                                    ; On         ; On            ;
+; Display missing 0-value coverage report                                                    ; On         ; On            ;
+; Detect setup and hold time violations                                                      ; Off        ; Off           ;
+; Detect glitches                                                                            ; Off        ; Off           ;
+; Disable timing delays in Timing Simulation                                                 ; Off        ; Off           ;
+; Generate Signal Activity File                                                              ; Off        ; Off           ;
+; Generate VCD File for PowerPlay Power Analyzer                                             ; Off        ; Off           ;
+; Group bus channels in simulation results                                                   ; Off        ; Off           ;
+; Preserve fewer signal transitions to reduce memory requirements                            ; On         ; On            ;
+; Trigger vector comparison with the specified mode                                          ; INPUT_EDGE ; INPUT_EDGE    ;
+; Disable setup and hold time violations detection in input registers of bi-directional pins ; Off        ; Off           ;
+; Overwrite Waveform Inputs With Simulation Outputs                                          ; Off        ;               ;
+; Perform Glitch Filtering in Timing Simulation                                              ; Auto       ; Auto          ;
++--------------------------------------------------------------------------------------------+------------+---------------+
+
+
++----------------------+
+; Simulation Waveforms ;
++----------------------+
+Waveform report data cannot be output to ASCII.
+Please use Quartus II to view the waveform report data.
+
+
++--------------------------------------------------------------------+
+; Coverage Summary                                                   ;
++-----------------------------------------------------+--------------+
+; Type                                                ; Value        ;
++-----------------------------------------------------+--------------+
+; Total coverage as a percentage                      ;      43.20 % ;
+; Total nodes checked                                 ; 115          ;
+; Total output ports checked                          ; 125          ;
+; Total output ports with complete 1/0-value coverage ; 54           ;
+; Total output ports with no 1/0-value coverage       ; 69           ;
+; Total output ports with no 1-value coverage         ; 69           ;
+; Total output ports with no 0-value coverage         ; 71           ;
++-----------------------------------------------------+--------------+
+
+
+The following table displays output ports that toggle between 1 and 0 during simulation.
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Complete 1/0-Value Coverage                                                                                                                                                            ;
++---------------------------------------------------------------------------------+-----------------------------------------------------------------------------------+------------------+
+; Node Name                                                                       ; Output Port Name                                                                  ; Output Port Type ;
++---------------------------------------------------------------------------------+-----------------------------------------------------------------------------------+------------------+
+; |CPU|REG_ADDR[0]                                                                ; |CPU|REG_ADDR[0]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[1]                                                                ; |CPU|REG_ADDR[1]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[2]                                                                ; |CPU|REG_ADDR[2]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[3]                                                                ; |CPU|REG_ADDR[3]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[4]                                                                ; |CPU|REG_ADDR[4]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[5]                                                                ; |CPU|REG_ADDR[5]                                                                  ; data_out0        ;
+; |CPU|AUT_BUS[0]                                                                 ; |CPU|AUT_BUS[0]                                                                   ; data_out0        ;
+; |CPU|AUT_BUS[1]                                                                 ; |CPU|AUT_BUS[1]                                                                   ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[0]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[1]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[2]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[3]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[4]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]    ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]~COUT ; cout             ;
+; |CPU|Mux22~0                                                                    ; |CPU|Mux22~0                                                                      ; data_out0        ;
+; |CPU|AUT_CPU[1]                                                                 ; |CPU|AUT_CPU[1]                                                                   ; data_out0        ;
+; |CPU|Mux39~0                                                                    ; |CPU|Mux39~0                                                                      ; data_out0        ;
+; |CPU|REG_CMD[23]                                                                ; |CPU|REG_CMD[23]                                                                  ; data_out0        ;
+; |CPU|REG_CMD[22]                                                                ; |CPU|REG_CMD[22]                                                                  ; data_out0        ;
+; |CPU|REG_CMD[21]                                                                ; |CPU|REG_CMD[21]                                                                  ; data_out0        ;
+; |CPU|Mux6~0                                                                     ; |CPU|Mux6~0                                                                       ; data_out0        ;
+; |CPU|REG_CMD[20]                                                                ; |CPU|REG_CMD[20]                                                                  ; data_out0        ;
+; |CPU|REG_CMD[19]                                                                ; |CPU|REG_CMD[19]                                                                  ; data_out0        ;
+; |CPU|Mux6~1                                                                     ; |CPU|Mux6~1                                                                       ; data_out0        ;
+; |CPU|Mux6~2                                                                     ; |CPU|Mux6~2                                                                       ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[15]~1 ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[15]~1   ; data_out0        ;
+; |CPU|REG_CMD[23]~5                                                              ; |CPU|REG_CMD[23]~5                                                                ; data_out0        ;
+; |CPU|GEN                                                                        ; |CPU|GEN~corein                                                                   ; dataout          ;
+; |CPU|ADDR[0]                                                                    ; |CPU|ADDR[0]                                                                      ; padio            ;
+; |CPU|ADDR[1]                                                                    ; |CPU|ADDR[1]                                                                      ; padio            ;
+; |CPU|ADDR[2]                                                                    ; |CPU|ADDR[2]                                                                      ; padio            ;
+; |CPU|ADDR[3]                                                                    ; |CPU|ADDR[3]                                                                      ; padio            ;
+; |CPU|ADDR[4]                                                                    ; |CPU|ADDR[4]                                                                      ; padio            ;
+; |CPU|ADDR[5]                                                                    ; |CPU|ADDR[5]                                                                      ; padio            ;
+; |CPU|MREQ                                                                       ; |CPU|MREQ                                                                         ; padio            ;
+; |CPU|RD                                                                         ; |CPU|RD                                                                           ; padio            ;
+; |CPU|D_AUT_CPU[0]                                                               ; |CPU|D_AUT_CPU[0]                                                                 ; padio            ;
+; |CPU|D_AUT_CPU[1]                                                               ; |CPU|D_AUT_CPU[1]                                                                 ; padio            ;
+; |CPU|D_AUT_BUS[0]                                                               ; |CPU|D_AUT_BUS[0]                                                                 ; padio            ;
+; |CPU|D_AUT_BUS[1]                                                               ; |CPU|D_AUT_BUS[1]                                                                 ; padio            ;
+; |CPU|D_PC[0]                                                                    ; |CPU|D_PC[0]                                                                      ; padio            ;
+; |CPU|D_PC[1]                                                                    ; |CPU|D_PC[1]                                                                      ; padio            ;
+; |CPU|D_PC[2]                                                                    ; |CPU|D_PC[2]                                                                      ; padio            ;
+; |CPU|D_PC[3]                                                                    ; |CPU|D_PC[3]                                                                      ; padio            ;
+; |CPU|D_PC[4]                                                                    ; |CPU|D_PC[4]                                                                      ; padio            ;
+; |CPU|DATA[4]                                                                    ; |CPU|DATA[4]~3                                                                    ; dataout          ;
+; |CPU|DATA[6]                                                                    ; |CPU|DATA[6]~1                                                                    ; dataout          ;
+; |CPU|DATA[7]                                                                    ; |CPU|DATA[7]~0                                                                    ; dataout          ;
+; |CPU|SIG_MREQ~1                                                                 ; |CPU|SIG_MREQ~1                                                                   ; data_out0        ;
++---------------------------------------------------------------------------------+-----------------------------------------------------------------------------------+------------------+
+
+
+The following table displays output ports that do not toggle to 1 during simulation.
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Missing 1-Value Coverage                                                                                                                                                              ;
++-------------------------------------------------------------------------------+------------------------------------------------------------------------------------+------------------+
+; Node Name                                                                     ; Output Port Name                                                                   ; Output Port Type ;
++-------------------------------------------------------------------------------+------------------------------------------------------------------------------------+------------------+
+; |CPU|REG_ADDR[6]                                                              ; |CPU|REG_ADDR[6]                                                                   ; data_out0        ;
+; |CPU|REG_ADDR[7]                                                              ; |CPU|REG_ADDR[7]                                                                   ; data_out0        ;
+; |CPU|REG_ADDR[8]                                                              ; |CPU|REG_ADDR[8]                                                                   ; data_out0        ;
+; |CPU|REG_ADDR[9]                                                              ; |CPU|REG_ADDR[9]                                                                   ; data_out0        ;
+; |CPU|REG_ADDR[10]                                                             ; |CPU|REG_ADDR[10]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[11]                                                             ; |CPU|REG_ADDR[11]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[12]                                                             ; |CPU|REG_ADDR[12]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[13]                                                             ; |CPU|REG_ADDR[13]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[14]                                                             ; |CPU|REG_ADDR[14]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[15]                                                             ; |CPU|REG_ADDR[15]                                                                  ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[6]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[6]       ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[6]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[6]~COUT  ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]       ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]~COUT  ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[8]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[8]       ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[8]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[8]~COUT  ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]       ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]~COUT  ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[11] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[11]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[11] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[11]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[12] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[12]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[12] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[12]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[13] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[13]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[13] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[13]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[14] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[14]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[14] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[14]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[15] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[15]      ; data_out0        ;
+; |CPU|RESET                                                                    ; |CPU|RESET~corein                                                                  ; dataout          ;
+; |CPU|ADDR[6]                                                                  ; |CPU|ADDR[6]                                                                       ; padio            ;
+; |CPU|ADDR[7]                                                                  ; |CPU|ADDR[7]                                                                       ; padio            ;
+; |CPU|ADDR[8]                                                                  ; |CPU|ADDR[8]                                                                       ; padio            ;
+; |CPU|ADDR[9]                                                                  ; |CPU|ADDR[9]                                                                       ; padio            ;
+; |CPU|ADDR[10]                                                                 ; |CPU|ADDR[10]                                                                      ; padio            ;
+; |CPU|ADDR[11]                                                                 ; |CPU|ADDR[11]                                                                      ; padio            ;
+; |CPU|ADDR[12]                                                                 ; |CPU|ADDR[12]                                                                      ; padio            ;
+; |CPU|ADDR[13]                                                                 ; |CPU|ADDR[13]                                                                      ; padio            ;
+; |CPU|ADDR[14]                                                                 ; |CPU|ADDR[14]                                                                      ; padio            ;
+; |CPU|ADDR[15]                                                                 ; |CPU|ADDR[15]                                                                      ; padio            ;
+; |CPU|IORQ                                                                     ; |CPU|IORQ                                                                          ; padio            ;
+; |CPU|WR                                                                       ; |CPU|WR                                                                            ; padio            ;
+; |CPU|WAIT_CPU                                                                 ; |CPU|WAIT_CPU                                                                      ; padio            ;
+; |CPU|D_AUT_CPU[2]                                                             ; |CPU|D_AUT_CPU[2]                                                                  ; padio            ;
+; |CPU|D_AUT_CPU[3]                                                             ; |CPU|D_AUT_CPU[3]                                                                  ; padio            ;
+; |CPU|D_AUT_CPU[4]                                                             ; |CPU|D_AUT_CPU[4]                                                                  ; padio            ;
+; |CPU|D_PC[6]                                                                  ; |CPU|D_PC[6]                                                                       ; padio            ;
+; |CPU|D_PC[7]                                                                  ; |CPU|D_PC[7]                                                                       ; padio            ;
+; |CPU|D_PC[8]                                                                  ; |CPU|D_PC[8]                                                                       ; padio            ;
+; |CPU|D_PC[9]                                                                  ; |CPU|D_PC[9]                                                                       ; padio            ;
+; |CPU|D_PC[10]                                                                 ; |CPU|D_PC[10]                                                                      ; padio            ;
+; |CPU|D_PC[11]                                                                 ; |CPU|D_PC[11]                                                                      ; padio            ;
+; |CPU|D_PC[12]                                                                 ; |CPU|D_PC[12]                                                                      ; padio            ;
+; |CPU|D_PC[13]                                                                 ; |CPU|D_PC[13]                                                                      ; padio            ;
+; |CPU|D_PC[14]                                                                 ; |CPU|D_PC[14]                                                                      ; padio            ;
+; |CPU|D_PC[15]                                                                 ; |CPU|D_PC[15]                                                                      ; padio            ;
+; |CPU|DATA[0]                                                                  ; |CPU|DATA[0]~output                                                                ; padio            ;
+; |CPU|DATA[1]                                                                  ; |CPU|DATA[1]~output                                                                ; padio            ;
+; |CPU|DATA[2]                                                                  ; |CPU|DATA[2]~output                                                                ; padio            ;
+; |CPU|DATA[3]                                                                  ; |CPU|DATA[3]~4                                                                     ; dataout          ;
+; |CPU|DATA[3]                                                                  ; |CPU|DATA[3]~output                                                                ; padio            ;
+; |CPU|DATA[4]                                                                  ; |CPU|DATA[4]~output                                                                ; padio            ;
+; |CPU|DATA[5]                                                                  ; |CPU|DATA[5]~2                                                                     ; dataout          ;
+; |CPU|DATA[5]                                                                  ; |CPU|DATA[5]~output                                                                ; padio            ;
+; |CPU|DATA[6]                                                                  ; |CPU|DATA[6]~output                                                                ; padio            ;
+; |CPU|DATA[7]                                                                  ; |CPU|DATA[7]~output                                                                ; padio            ;
+; |CPU|WT                                                                       ; |CPU|WT~0                                                                          ; dataout          ;
+; |CPU|WT                                                                       ; |CPU|WT~output                                                                     ; padio            ;
+; |CPU|WAIT_CPU~0                                                               ; |CPU|WAIT_CPU~0                                                                    ; data_out0        ;
++-------------------------------------------------------------------------------+------------------------------------------------------------------------------------+------------------+
+
+
+The following table displays output ports that do not toggle to 0 during simulation.
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Missing 0-Value Coverage                                                                                                                                                              ;
++-------------------------------------------------------------------------------+------------------------------------------------------------------------------------+------------------+
+; Node Name                                                                     ; Output Port Name                                                                   ; Output Port Type ;
++-------------------------------------------------------------------------------+------------------------------------------------------------------------------------+------------------+
+; |CPU|REG_ADDR[6]                                                              ; |CPU|REG_ADDR[6]                                                                   ; data_out0        ;
+; |CPU|REG_ADDR[7]                                                              ; |CPU|REG_ADDR[7]                                                                   ; data_out0        ;
+; |CPU|REG_ADDR[8]                                                              ; |CPU|REG_ADDR[8]                                                                   ; data_out0        ;
+; |CPU|REG_ADDR[9]                                                              ; |CPU|REG_ADDR[9]                                                                   ; data_out0        ;
+; |CPU|REG_ADDR[10]                                                             ; |CPU|REG_ADDR[10]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[11]                                                             ; |CPU|REG_ADDR[11]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[12]                                                             ; |CPU|REG_ADDR[12]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[13]                                                             ; |CPU|REG_ADDR[13]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[14]                                                             ; |CPU|REG_ADDR[14]                                                                  ; data_out0        ;
+; |CPU|REG_ADDR[15]                                                             ; |CPU|REG_ADDR[15]                                                                  ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[5]       ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[6]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[6]       ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[6]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[6]~COUT  ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]       ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[7]~COUT  ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[8]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[8]       ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[8]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[8]~COUT  ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]       ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]  ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[9]~COUT  ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[10]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[11] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[11]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[11] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[11]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[12] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[12]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[12] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[12]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[13] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[13]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[13] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[13]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[14] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[14]      ; data_out0        ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[14] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[14]~COUT ; cout             ;
+; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[15] ; |CPU|lpm_counter:REG_PC_rtl_0|alt_counter_f10ke:wysi_counter|counter_cell[15]      ; data_out0        ;
+; |CPU|RESET                                                                    ; |CPU|RESET~corein                                                                  ; dataout          ;
+; |CPU|ADDR[6]                                                                  ; |CPU|ADDR[6]                                                                       ; padio            ;
+; |CPU|ADDR[7]                                                                  ; |CPU|ADDR[7]                                                                       ; padio            ;
+; |CPU|ADDR[8]                                                                  ; |CPU|ADDR[8]                                                                       ; padio            ;
+; |CPU|ADDR[9]                                                                  ; |CPU|ADDR[9]                                                                       ; padio            ;
+; |CPU|ADDR[10]                                                                 ; |CPU|ADDR[10]                                                                      ; padio            ;
+; |CPU|ADDR[11]                                                                 ; |CPU|ADDR[11]                                                                      ; padio            ;
+; |CPU|ADDR[12]                                                                 ; |CPU|ADDR[12]                                                                      ; padio            ;
+; |CPU|ADDR[13]                                                                 ; |CPU|ADDR[13]                                                                      ; padio            ;
+; |CPU|ADDR[14]                                                                 ; |CPU|ADDR[14]                                                                      ; padio            ;
+; |CPU|ADDR[15]                                                                 ; |CPU|ADDR[15]                                                                      ; padio            ;
+; |CPU|IORQ                                                                     ; |CPU|IORQ                                                                          ; padio            ;
+; |CPU|WR                                                                       ; |CPU|WR                                                                            ; padio            ;
+; |CPU|WAIT_CPU                                                                 ; |CPU|WAIT_CPU                                                                      ; padio            ;
+; |CPU|D_AUT_CPU[2]                                                             ; |CPU|D_AUT_CPU[2]                                                                  ; padio            ;
+; |CPU|D_AUT_CPU[3]                                                             ; |CPU|D_AUT_CPU[3]                                                                  ; padio            ;
+; |CPU|D_AUT_CPU[4]                                                             ; |CPU|D_AUT_CPU[4]                                                                  ; padio            ;
+; |CPU|D_PC[5]                                                                  ; |CPU|D_PC[5]                                                                       ; padio            ;
+; |CPU|D_PC[6]                                                                  ; |CPU|D_PC[6]                                                                       ; padio            ;
+; |CPU|D_PC[7]                                                                  ; |CPU|D_PC[7]                                                                       ; padio            ;
+; |CPU|D_PC[8]                                                                  ; |CPU|D_PC[8]                                                                       ; padio            ;
+; |CPU|D_PC[9]                                                                  ; |CPU|D_PC[9]                                                                       ; padio            ;
+; |CPU|D_PC[10]                                                                 ; |CPU|D_PC[10]                                                                      ; padio            ;
+; |CPU|D_PC[11]                                                                 ; |CPU|D_PC[11]                                                                      ; padio            ;
+; |CPU|D_PC[12]                                                                 ; |CPU|D_PC[12]                                                                      ; padio            ;
+; |CPU|D_PC[13]                                                                 ; |CPU|D_PC[13]                                                                      ; padio            ;
+; |CPU|D_PC[14]                                                                 ; |CPU|D_PC[14]                                                                      ; padio            ;
+; |CPU|D_PC[15]                                                                 ; |CPU|D_PC[15]                                                                      ; padio            ;
+; |CPU|DATA[0]                                                                  ; |CPU|DATA[0]~output                                                                ; padio            ;
+; |CPU|DATA[1]                                                                  ; |CPU|DATA[1]~output                                                                ; padio            ;
+; |CPU|DATA[2]                                                                  ; |CPU|DATA[2]~output                                                                ; padio            ;
+; |CPU|DATA[3]                                                                  ; |CPU|DATA[3]~4                                                                     ; dataout          ;
+; |CPU|DATA[3]                                                                  ; |CPU|DATA[3]~output                                                                ; padio            ;
+; |CPU|DATA[4]                                                                  ; |CPU|DATA[4]~output                                                                ; padio            ;
+; |CPU|DATA[5]                                                                  ; |CPU|DATA[5]~2                                                                     ; dataout          ;
+; |CPU|DATA[5]                                                                  ; |CPU|DATA[5]~output                                                                ; padio            ;
+; |CPU|DATA[6]                                                                  ; |CPU|DATA[6]~output                                                                ; padio            ;
+; |CPU|DATA[7]                                                                  ; |CPU|DATA[7]~output                                                                ; padio            ;
+; |CPU|WT                                                                       ; |CPU|WT~0                                                                          ; dataout          ;
+; |CPU|WT                                                                       ; |CPU|WT~output                                                                     ; padio            ;
+; |CPU|WAIT_CPU~0                                                               ; |CPU|WAIT_CPU~0                                                                    ; data_out0        ;
++-------------------------------------------------------------------------------+------------------------------------------------------------------------------------+------------------+
+
+
++---------------------+
+; Simulator INI Usage ;
++--------+------------+
+; Option ; Usage      ;
++--------+------------+
+
+
++--------------------+
+; Simulator Messages ;
++--------------------+
+Info: *******************************************************************
+Info: Running Quartus II Simulator
+    Info: Version 9.0 Build 235 06/17/2009 Service Pack 2 SJ Web Edition
+    Info: Processing started: Sun May 08 17:37:10 2011
+Info: Command: quartus_sim --read_settings_files=on --write_settings_files=off CPU -c CPU
+Info: Using vector source file "d:/program files/altera/90sp2/quartus/CPU.vwf"
+Warning: Can't find signal in vector source file for input pin "|CPU|RESET"
+Info: Inverted registers were found during simulation
+    Info: Register: |CPU|SIG_MREQ
+Info: Option to preserve fewer signal transitions to reduce memory requirements is enabled
+    Info: Simulation has been partitioned into sub-simulations according to the maximum transition count determined by the engine. Transitions from memory will be flushed out to disk at the end of each sub-simulation to reduce memory requirements.
+Info: Simulation partitioned into 1 sub-simulations
+Info: Simulation coverage is      43.20 %
+Info: Number of transitions in simulation is 5041
+Info: Quartus II Simulator was successful. 0 errors, 1 warning
+    Info: Peak virtual memory: 116 megabytes
+    Info: Processing ended: Sun May 08 17:37:11 2011
+    Info: Elapsed time: 00:00:01
+    Info: Total CPU time (on all processors): 00:00:01
+
+
