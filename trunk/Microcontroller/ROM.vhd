@@ -33,7 +33,7 @@ architecture arch_ROM of ROM is
 		
 	e0: lpm_rom
 		generic map (LPM_WIDTH=>8, LPM_WIDTHAD=>7, LPM_NUMWORDS=>90,
-				LPM_FILE=>"PROG1.mif", LPM_OUTDATA => "UNREGISTERED",
+				LPM_FILE=>"cpu_asm.mif", LPM_OUTDATA => "UNREGISTERED",
 				LPM_ADDRESS_CONTROL => "UNREGISTERED",
 				LPM_HINT => "UNUSED")
 		port map (address => A(6 downto 0), q => D, memenab => CSEL);

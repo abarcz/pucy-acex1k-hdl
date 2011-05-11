@@ -24,17 +24,21 @@ entity Microcontroller is
 				V_WT	: out std_logic;
 				
 				-- sygnaly WE / WY
-				L_A		: out std_logic_vector(7 downto 0); -- diody gorny rzad
-				L_B		: out std_logic_vector(7 downto 0); -- diody dolny rzad
+				-- L_A		: out std_logic_vector(7 downto 0); -- diody gorny rzad
+				-- L_B		: out std_logic_vector(7 downto 0); -- diody dolny rzad
 				P_1		: out std_logic_vector(7 downto 0); -- port danych do LPT (SV1)
 				P_2		: in std_logic_vector(7 downto 0); 	-- port stanu z LPT (SV2)
 				P_3		: out std_logic_vector(7 downto 0); -- port sterowania do LPT (SV3)
-				P_4		: in std_logic_vector(7 downto 0); 	-- port wejsciowy z PS/2 (SV4)
+				--P_4		: in std_logic_vector(7 downto 0); 	-- port wejsciowy z PS/2 (SV4)
 				--P_5		: out std_logic_vector(7 downto 0); -- port SV5 (nieuzywany)
 				--P_7		: out std_logic_vector(7 downto 0); -- port SV7 (nieuzywany)
 				--SW1B		: in std_logic;					-- przelacznik SW1B, nieuzywany
 				--SW2B		: in std_logic;					-- przelacznik SW2B, nieuzywany				
-				SW3B	: in std_logic						-- przelacznik RESET: GND=>RES
+				SW3B	: in std_logic;						-- przelacznik RESET: GND=>RES
+				
+				--DX_AUT_CPU			:	out std_logic_vector (4 downto 0);
+				DX_REGADDRn			: 	out std_logic_vector (15 downto 0);
+				DX_REG_ADDRESS		:	out std_logic_vector (15 downto 0)
 				);
 	
 end entity Microcontroller;
@@ -55,6 +59,8 @@ architecture arch_Microcontroller of Microcontroller is
 	-- sygnal z LPT sygnalizujacy gotowosc drukarki
 	signal LPT_READY	: std_logic;
 	
+	signal DEB8			: std_logic_vector(7 downto 0);
+	
 	component CPU is
 		port (
 			GEN			:	in std_logic;							-- Clock
@@ -66,7 +72,10 @@ architecture arch_Microcontroller of Microcontroller is
 			WR			: 	out std_logic;							-- Write enable
 			RD			:	out std_logic;							-- Read enable
 			WT			:	inout std_logic;						-- Wait bus
-			WAIT_CPU	: 	out std_logic							-- Wait cpu
+			WAIT_CPU	: 	out std_logic;							-- Wait cpu
+			D_REGADDRn			: 	out std_logic_vector (15 downto 0);
+			D_REG_ADDRESS		:	out std_logic_vector (15 downto 0)
+
 			);
 	end component CPU;
 	
@@ -98,7 +107,7 @@ architecture arch_Microcontroller of Microcontroller is
 				LDATASYN	: out std_logic_vector (7 downto 0)  -- SV5: dane do LPT
 			);
 	end component LPT_OUT;
-	
+	--e3:	PS2_IN port map (GEN, RESET, V_A(7 downto 0), VI_D, V_WT, V_IORQ, V_RD, PS2_KEYNUM, P_4);
 	component PS2_IN is
 		port ( 	GEN		: in std_logic;	-- 20MHz clock 
 				RESET	: in std_logic;	-- Reset signal from uC
@@ -121,6 +130,9 @@ architecture arch_Microcontroller of Microcontroller is
 		
 		-- :TODO: do podzespolow powinny dochodzic tylko sygnaly B_x, nie V_x!
 		-- debug
+		--DEB8 <= "10101010";
+		--P_1 <= DEB8;
+		
 		B_A <= V_A; 
 		B_D <= VI_D; -- :TODO: B_D nieuzywane, uzyte VI_D!
 		--VO_D <= B_D;
@@ -130,18 +142,20 @@ architecture arch_Microcontroller of Microcontroller is
 		RESET		<= SW3B;
 
 		-- sygnalizacja na diodach
-		L_A			<= (LPT_READY & B_WT & "111" & PS2_KEYNUM(2 downto 0));
-		L_B			<= VI_D; -- :TODO: powinno byc B_D
+		--L_A			<= (LPT_READY & B_WT & "111" & PS2_KEYNUM(2 downto 0));
+		--L_B			<= VI_D; -- :TODO: powinno byc B_D
 		
-	e9: CPU port map (GEN, RESET, V_A, VI_D, V_MRQ, V_IORQ, V_WR, V_RD, B_WT, WAIT_CPU);
+		
+		
+	e9: CPU port map (GEN, RESET, V_A, VI_D, V_MRQ, V_IORQ, V_WR, V_RD, B_WT, WAIT_CPU, DX_REGADDRn, DX_REG_ADDRESS);
 	
 	e0: ROM port map (V_A, VI_D, V_MRQ, V_RD);
 	
 	e1: RAM port map (V_A, VI_D, V_MRQ, V_RD, V_WR);
 	
-	e2: LPT_OUT port map (GEN, RESET, V_A(7 downto 0), VI_D, V_IORQ, V_WR, B_WT, 
-							LPT_READY, P_3, P_2, P_1);
-							
-	e3:	PS2_IN port map (GEN, RESET, V_A(7 downto 0), B_D, B_WT, V_IORQ, V_RD, PS2_KEYNUM, P_4);
+	e2: LPT_OUT port map (GEN, RESET, V_A(7 downto 0), VI_D, V_IORQ, V_WR, B_WT,LPT_READY, P_3, P_2, P_1);
+			
+	-- :TODO: Szyna D[] z PS2_IN nie jest trojstanowa - nie da sie podlaczyc				
+	--e3:	PS2_IN port map (GEN, RESET, V_A(7 downto 0), VI_D, V_WT, V_IORQ, V_RD, PS2_KEYNUM, P_4);
 	
 end architecture arch_Microcontroller;
