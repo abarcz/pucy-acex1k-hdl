@@ -9,5 +9,6 @@
 	- depth to 90
 	- addresses of instructions, accordingly to their sizes (remember, addresses are given in words, in this case 8bit-words)
 6. finally, change the blank space initializing command to:
-	- "[xx..59]: 00;", where xx is the first free address after the last instruction (remember the instruction sizes)
+	- "[xx..59]: 0F;", where xx is the first free address after the last instruction (remember the instruction sizes)
+	0F must be used instead of 00, because it signifies the STOP instruction.
 7. if Quartus compilation report gives no "address rewritten" and no "address uninitialized" errors, the file is OK.

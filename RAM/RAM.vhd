@@ -27,12 +27,13 @@ entity RAM is
 
 	port (	A	: in std_logic_vector (15 downto 0);
 			D	: inout std_logic_vector (7 downto 0);
-	MRQ, RD, WR	: in std_logic;
-	V_CSR :out std_logic;
-	V_CSW : out std_logic;
-	V_LD : out std_logic_vector (7 downto 0);
-	V_LA : out std_logic_vector (10 downto 0);
-	V_RIO : out std_logic_vector (7 downto 0) );
+	MRQ, RD, WR	: in std_logic
+--	V_CSR :out std_logic;
+--	V_CSW : out std_logic;
+--	V_LD : out std_logic_vector (7 downto 0);
+--	V_LA : out std_logic_vector (10 downto 0);
+--	V_RIO : out std_logic_vector (7 downto 0) 
+	);
 	
 end entity RAM;
 
@@ -45,11 +46,11 @@ architecture arch_RAM of RAM is
 	
 
 	begin
-		V_CSR <= CSR;
-		V_CSW <= CSW;
-		V_LA <= LA;
-		V_LD <= LD;
-		V_RIO <= RIO;
+--		V_CSR <= CSR;
+--		V_CSW <= CSW;
+--		V_LA <= LA;
+--		V_LD <= LD;
+--		V_RIO <= RIO;
 		
 	
 	-- zatrzasnij D[] dla WR

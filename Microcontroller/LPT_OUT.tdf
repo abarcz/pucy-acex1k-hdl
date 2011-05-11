@@ -7,7 +7,7 @@ i wysylajacy ja w postaci ZDDD przez port LPT do drukarki.
 %
 INCLUDE "U2_TO_ASCII.inc";
 
-CONSTANT strobe_time = 10;	% 0,5us dla !STROBE 				%
+CONSTANT strobe_time = 1;	% 0,5us dla !STROBE 				%
 % 0,5u / 0,05u = 10												%
 
 CONSTANT dev_addr 	= H"10";	% adres tego urzadzenia w IO	%

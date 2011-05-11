@@ -1,0 +1,16 @@
+-- FPGA-CPU TEST PROGRAM
+-- Altera Instruction Memory Initialization File
+Depth = 90;
+Width = 8;
+Address_radix = HEX;
+Data_radix = HEX;
+Content
+Begin
+-- Use NOPS for default instruction memory values
+    [4..59]: 0F; -- nop
+-- Place MIPS Instructions here
+-- Note: memory addresses are in words and not bytes
+-- i.e. next location is +1 and not +4
+	00: 70 03;   -- START:	MOVI R0, H#03
+    02: 68 10;   -- 	OUT R0, H#10
+End;

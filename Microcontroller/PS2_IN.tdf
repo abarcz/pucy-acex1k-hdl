@@ -27,6 +27,7 @@ SUBDESIGN PS2_IN
 )
 VARIABLE
 	-- Bus
+	TRI_D[7..0]				: TRI;		-- tristate buffer for D[]
 	CMD_READ				: DFF;		-- Read command from uC
 	KEY_Z[7..0]				: DFF;		-- Sign byte from keyboard
 	KEY_D0[7..0]			: DFF;		-- First number
@@ -127,7 +128,11 @@ BEGIN
 		when B"11"	=> PS2_DEBUG_PORT[] = 7;
 	end case;
 	
-	DATA[] = DFF_DATA[];
+	% tristate output data to D[] bus %
+	TRI_D[].oe 				= CMD_READ;
+	TRI_D[].in 				= DFF_DATA[];
+	DATA[] 					= TRI_D[];
+	-- DATA[] = DFF_DATA[];
 	
 	% Hardwired byte from frame %
 	PS2_BYTE[] = (PS2_FRAME8,PS2_FRAME7,PS2_FRAME6,PS2_FRAME5,PS2_FRAME4,PS2_FRAME3,PS2_FRAME2,PS2_FRAME1);
