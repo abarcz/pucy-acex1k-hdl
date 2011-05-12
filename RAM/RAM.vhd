@@ -89,16 +89,26 @@ architecture arch_RAM of RAM is
 		end process cs;
 		
 	-- pamiec RAM
-	e0: lpm_ram_io
+--	e0: lpm_ram_io
+--		generic map (LPM_WIDTH=>8, LPM_WIDTHAD=>11, LPM_NUMWORDS=>1099,
+--				LPM_INDATA => "UNREGISTERED", LPM_OUTDATA => "UNREGISTERED",
+--				LPM_ADDRESS_CONTROL => "UNREGISTERED")
+--		port map (dio => RIO, address => LA, memenab => CSEL,
+--					we => not WR, outenab => not RD);
+	
+	e0: lpm_ram_dq
 		generic map (LPM_WIDTH=>8, LPM_WIDTHAD=>11, LPM_NUMWORDS=>1099,
 				LPM_INDATA => "UNREGISTERED", LPM_OUTDATA => "UNREGISTERED",
 				LPM_ADDRESS_CONTROL => "UNREGISTERED")
-		port map (dio => RIO, address => LA, memenab => CSEL,
-					we => not WR, outenab => not RD);
-	
+		port map (data => LD, address=> LA, we => CSW, q => RIO);
+		
 	-- trojstanowa szyna danych do podlaczenia RAMu z zatrzasnietym D[]
+--	t1: lpm_bustri
+--		generic map (LPM_WIDTH=>8)
+--		port map (data => LD, enabledt => CSW, enabletr => CSR, result => D, tridata => RIO);
+		
 	t1: lpm_bustri
 		generic map (LPM_WIDTH=>8)
-		port map (data => LD, enabledt => CSW, enabletr => CSR, result => D, tridata => RIO);
+		port map (data => RIO, enabledt => CSR, tridata => D);
 		
 end architecture arch_RAM;
