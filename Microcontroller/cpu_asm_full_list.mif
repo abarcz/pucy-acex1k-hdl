@@ -7,7 +7,7 @@ Data_radix = HEX;
 Content
 Begin
 -- Use NOPS for default instruction memory values
-    [22..59]: 0F; -- nop
+    [22..59]: 78; -- nop
 -- Place MIPS Instructions here
 -- Note: memory addresses are in words and not bytes
 -- i.e. next location is +1 and not +4

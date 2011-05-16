@@ -19,26 +19,32 @@ entity Microcontroller is
 				-- debug
 				V_A		: inout std_logic_vector(15 downto 0);
 				VI_D	: inout std_logic_vector(7 downto 0);
-				VO_D	: out std_logic_vector(7 downto 0);
+				--VO_D	: out std_logic_vector(7 downto 0);
 				V_MRQ, V_IORQ, V_RD, V_WR : inout std_logic;
-				V_WT	: out std_logic;
+				V_WT	: buffer std_logic;
 				
 				-- sygnaly WE / WY
-				-- L_A		: out std_logic_vector(7 downto 0); -- diody gorny rzad
-				-- L_B		: out std_logic_vector(7 downto 0); -- diody dolny rzad
+				L_A		: out std_logic_vector(7 downto 0); -- diody gorny rzad
+				L_B		: out std_logic_vector(7 downto 0); -- diody dolny rzad
 				P_1		: out std_logic_vector(7 downto 0); -- port danych do LPT (SV1)
 				P_2		: in std_logic_vector(7 downto 0); 	-- port stanu z LPT (SV2)
 				P_3		: out std_logic_vector(7 downto 0); -- port sterowania do LPT (SV3)
-				--P_4		: in std_logic_vector(7 downto 0); 	-- port wejsciowy z PS/2 (SV4)
+				P_4		: in std_logic_vector(7 downto 0); 	-- port wejsciowy z PS/2 (SV4)
 				--P_5		: out std_logic_vector(7 downto 0); -- port SV5 (nieuzywany)
 				--P_7		: out std_logic_vector(7 downto 0); -- port SV7 (nieuzywany)
 				--SW1B		: in std_logic;					-- przelacznik SW1B, nieuzywany
 				--SW2B		: in std_logic;					-- przelacznik SW2B, nieuzywany				
 				SW3B	: in std_logic;						-- przelacznik RESET: GND=>RES
 				
+				DX_REG_ACC_EN		:	out std_logic;							-- Accumulator wr. en.
+				DX_ADDR_REG_A		:	out std_logic_vector (2 downto 0);		-- Register A address
+				DX_ADDR_REG_B		:	out std_logic_vector (2 downto 0);		-- Register B address
+				DX_ADDR_REG_ACC		:	out std_logic_vector (2 downto 0);		-- Accumulator address
+				DX_REG_A			: 	out std_logic_vector (7 downto 0)
+				
 				--DX_AUT_CPU			:	out std_logic_vector (4 downto 0);
-				DX_REGADDRn			: 	out std_logic_vector (15 downto 0);
-				DX_REG_ADDRESS		:	out std_logic_vector (15 downto 0)
+				--DX_REGADDRn			: 	out std_logic_vector (15 downto 0)
+				--DX_REG_ADDRESS		:	out std_logic_vector (15 downto 0)
 				);
 	
 end entity Microcontroller;
@@ -61,6 +67,8 @@ architecture arch_Microcontroller of Microcontroller is
 	
 	signal DEB8			: std_logic_vector(7 downto 0);
 	
+	signal DX_DATA		: std_logic_vector (7 downto 0);
+	
 	component CPU is
 		port (
 			GEN			:	in std_logic;							-- Clock
@@ -73,9 +81,13 @@ architecture arch_Microcontroller of Microcontroller is
 			RD			:	out std_logic;							-- Read enable
 			WT			:	inout std_logic;						-- Wait bus
 			WAIT_CPU	: 	out std_logic;							-- Wait cpu
-			D_REGADDRn			: 	out std_logic_vector (15 downto 0);
-			D_REG_ADDRESS		:	out std_logic_vector (15 downto 0)
-
+			D_REG_ACC_EN		:	out std_logic;							-- Accumulator wr. en.
+			D_ADDR_REG_A		:	out std_logic_vector (2 downto 0);		-- Register A address
+			D_ADDR_REG_B		:	out std_logic_vector (2 downto 0);		-- Register B address
+			D_ADDR_REG_ACC		:	out std_logic_vector (2 downto 0);		-- Accumulator address
+			D_REG_A				: 	out std_logic_vector (7 downto 0)
+			--D_DATA		: 	out std_logic_vector (7 downto 0)
+			--D_REGADDRn			: 	out std_logic_vector (15 downto 0)
 			);
 	end component CPU;
 	
@@ -142,12 +154,12 @@ architecture arch_Microcontroller of Microcontroller is
 		RESET		<= SW3B;
 
 		-- sygnalizacja na diodach
-		--L_A			<= (LPT_READY & B_WT & "111" & PS2_KEYNUM(2 downto 0));
-		--L_B			<= VI_D; -- :TODO: powinno byc B_D
+		L_A			<= (LPT_READY & V_WT & "101" & PS2_KEYNUM(2 downto 0));
+		L_B			<= DX_DATA; -- :TODO: powinno byc B_D
 		
 		
 		
-	e9: CPU port map (GEN, RESET, V_A, VI_D, V_MRQ, V_IORQ, V_WR, V_RD, B_WT, WAIT_CPU, DX_REGADDRn, DX_REG_ADDRESS);
+	e9: CPU port map (GEN, RESET, V_A, VI_D, V_MRQ, V_IORQ, V_WR, V_RD, B_WT, WAIT_CPU, DX_REG_ACC_EN,DX_ADDR_REG_A,DX_ADDR_REG_B,DX_ADDR_REG_ACC,DX_REG_A);
 	
 	e0: ROM port map (V_A, VI_D, V_MRQ, V_RD);
 	
@@ -156,6 +168,6 @@ architecture arch_Microcontroller of Microcontroller is
 	e2: LPT_OUT port map (GEN, RESET, V_A(7 downto 0), VI_D, V_IORQ, V_WR, B_WT,LPT_READY, P_3, P_2, P_1);
 			
 	-- :TODO: Szyna D[] z PS2_IN nie jest trojstanowa - nie da sie podlaczyc				
-	--e3:	PS2_IN port map (GEN, RESET, V_A(7 downto 0), VI_D, V_WT, V_IORQ, V_RD, PS2_KEYNUM, P_4);
+	e3:	PS2_IN port map (GEN, RESET, V_A(7 downto 0), VI_D, B_WT, V_IORQ, V_RD, PS2_KEYNUM, P_4);
 	
 end architecture arch_Microcontroller;

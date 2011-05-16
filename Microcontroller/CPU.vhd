@@ -20,11 +20,19 @@ entity CPU is
 			WAIT_CPU	: 	out std_logic;							-- Wait cpu
 		
 			-- debug
+			D_REG_ACC_EN		:	out std_logic;							-- Accumulator wr. en.
+			D_ADDR_REG_A		:	out std_logic_vector (2 downto 0);		-- Register A address
+			D_ADDR_REG_B		:	out std_logic_vector (2 downto 0);		-- Register B address
+			D_ADDR_REG_ACC		:	out std_logic_vector (2 downto 0);		-- Accumulator address
+			D_REG_A				: 	out std_logic_vector (7 downto 0);
+			
+			D_DATA				: 	out std_logic_vector (7 downto 0);
 			D_REGADDRn			: 	out std_logic_vector (15 downto 0);
 			D_REG_ADDRESS		:	out std_logic_vector (15 downto 0);
 			D_AUT_CPU			:	out std_logic_vector (4 downto 0);
 			D_AUT_BUS			:	out std_logic_vector (2 downto 0);
 			D_PC				:	out std_logic_vector (15 downto 0)
+			
 			--D_REG_PC			:	out std_logic_vector (15 downto 0);
 			--D_REG_PCn			:	out std_logic_vector (15 downto 0);
 			--D_REG_PCx			:	out std_logic_vector (15 downto 0);
@@ -61,6 +69,8 @@ architecture CPU_module of CPU is
 	signal SIG_RDn			:	std_logic;							-- Next bus read en.
 	signal SIG_WR			:	std_logic;							-- Bus write enable
 	signal SIG_WRn			:	std_logic;							-- Next bus write en.
+	signal SIG_DOUT			:	std_logic;							-- Enables DATA output to bus
+	signal SIG_DOUTn		:	std_logic;
 	-- State machines
 	-- Main CPU state machine ( instruction fetch etc. )
 	signal AUT_CPU			: 	std_logic_vector (4 downto 0);
@@ -81,6 +91,13 @@ architecture CPU_module of CPU is
 	constant AUT_CPU_OUT1			:	std_logic_vector (4 downto 0) := "01100";
 	constant AUT_CPU_OUT2			:	std_logic_vector (4 downto 0) := "01101";
 	constant AUT_CPU_OUT3			:	std_logic_vector (4 downto 0) := "01110";
+	constant AUT_CPU_IN1			:	std_logic_vector (4 downto 0) := "01111";
+	constant AUT_CPU_IN2			:	std_logic_vector (4 downto 0) := "10000";
+	constant AUT_CPU_IN3			:	std_logic_vector (4 downto 0) := "10001";
+	constant AUT_CPU_FETCH2			:	std_logic_vector (4 downto 0) := "10010";
+	constant AUT_CPU_RAM_RD1		:	std_logic_vector (4 downto 0) := "10011";
+	constant AUT_CPU_RAM_RD2		:	std_logic_vector (4 downto 0) := "10100";
+	constant AUT_CPU_RAM_RD3		:	std_logic_vector (4 downto 0) := "10101";
 	-- Bus communication state machine ( mreq, iorq, rd, wr etc. )
 	signal AUT_BUS			:	std_logic_vector (2 downto 0);
 	signal AUT_BUSn			:	std_logic_vector (2 downto 0);
@@ -90,14 +107,18 @@ architecture CPU_module of CPU is
 	constant AUT_BUS_CYCLE2		:	std_logic_vector (2 downto 0) := "010";
 	constant AUT_BUS_STOP		:	std_logic_vector (2 downto 0) := "011"; 
 	constant AUT_BUS_WAIT		: 	std_logic_vector (2 downto 0) := "100";
+	constant AUT_BUS_WAIT2		:	std_logic_vector (2 downto 0) := "101";
+	constant AUT_BUS_WAIT3		:	std_logic_vector (2 downto 0) := "110";
 	-- Universal registers
 	signal REG_ACC_EN		:	std_logic;							-- Accumulator wr. en.
+	signal REG_ACC_ENn		:	std_logic;
 	signal ADDR_REG_A		:	std_logic_vector (2 downto 0);		-- Register A address
 	signal ADDR_REG_B		:	std_logic_vector (2 downto 0);		-- Register B address
 	signal ADDR_REG_ACC		:	std_logic_vector (2 downto 0);		-- Accumulator address
 	signal REG_A			:	std_logic_vector (7 downto 0);		-- Register A
 	signal REG_B			:	std_logic_vector (7 downto 0);		-- Register B
 	signal REG_ACC			:	std_logic_vector (7 downto 0);		-- Accumulator Register
+	signal REG_ACCn			:	std_logic_vector (7 downto 0);		-- Accumulator Register
 	signal REG_ACCx			:	std_logic_vector (7 downto 0);		-- Accumulator Reg. inter.
 	signal MULTI_RES		:	std_logic_vector (15 downto 0);		-- Multiplication result
 	
@@ -112,7 +133,12 @@ architecture CPU_module of CPU is
 					REG_CMD,
 					REG_PC,
 					REG_PCx,
-					SIG_DATA
+					SIG_DATA,
+					REG_A,
+					REG_B,
+					REG_ACCx,
+					REG_ACC,
+					ADDR_REG_ACC
 					--
 					--
 					--
@@ -122,8 +148,14 @@ architecture CPU_module of CPU is
 					REG_DATAn<=REG_DATA;
 					REG_CMDn<=REG_CMD;
 					REG_PCn<=REG_PC;
+					REG_ACC_ENn<='0';
+					REG_ACCn<=REG_ACC;
 					--
 					REG_ADDRESS<=REG_PC;
+					
+					ADDR_REG_ACC <= REG_CMD(18 downto 16);
+					ADDR_REG_A <= REG_CMD(14 downto 12);
+					ADDR_REG_B <= REG_CMD(10 downto 8);
 					--
 					--
 					SIG_BUS_START<='0';
@@ -132,11 +164,18 @@ architecture CPU_module of CPU is
 					REG_PCx<=unsigned(REG_PC)+1;
 					--
 					
-					case AUT_CPU is
+					case AUT_CPU is		
 						when AUT_CPU_FETCH =>
 							--
+							--SIG_BUS_START<='1';
+							--REG_CMDn<=(others => '0');
+							
+							AUT_CPUn<=AUT_CPU_FETCH2;
+							
+						when AUT_CPU_FETCH2 =>
+							--
 							SIG_BUS_START<='1';
-							REG_CMDn<=(others => '0');
+							--REG_CMDn<=(others => '0');
 							
 							AUT_CPUn<=AUT_CPU_CMD;
 							
@@ -184,7 +223,6 @@ architecture CPU_module of CPU is
 							end if;
 							
 						when AUT_CPU_CMD5 =>
-							SIG_BUS_START<='1';	-- look AUT_CPU_CMD2!!!
 							AUT_CPUn<=AUT_CPU_CMD6;
 							
 						when AUT_CPU_CMD6 =>
@@ -193,6 +231,7 @@ architecture CPU_module of CPU is
 							if SIG_BUS_STOP='0' then
 								AUT_CPUn<=AUT_CPU_CMD6;
 							else
+								REG_PCn<=std_logic_vector(REG_PCx);
 								AUT_CPUn<=AUT_CPU_EXE;
 							end if;
 							
@@ -209,7 +248,7 @@ architecture CPU_module of CPU is
 									
 									AUT_CPUn<=AUT_CPU_FETCH;
 								  
-							-- [01] JMP Rd=0,A (2 byte)	nie rozumiem?
+							-- [01] JMP Rd=0,A (2 byte)
 							elsif 	REG_CMD(23 downto 19)="00001" then
 									--
 									AUT_CPUn<=AUT_CPU_FETCH;
@@ -223,38 +262,38 @@ architecture CPU_module of CPU is
 							
 							-- [03] Rd<=Ra (2 byte)
 							elsif	REG_CMD(23 downto 19)="00011" then
-									REG_ACC<=REG_A;
-									REG_ACC_EN<='1';
+									REG_ACCn<=REG_A;
+									REG_ACC_ENn<='1';
 									
 									AUT_CPUn<=AUT_CPU_FETCH;
 							
 							-- [04] Rd<=Ra+Rb (2 byte)
 							elsif	REG_CMD(23 downto 19)="00100" then
 									REG_ACCx<=signed(REG_A)+signed(REG_B);
-									REG_ACC<=std_logic_vector(REG_ACCx);
-									REG_ACC_EN<='1';
+									REG_ACCn<=std_logic_vector(REG_ACCx);
+									REG_ACC_ENn<='1';
 									
 									AUT_CPUn<=AUT_CPU_FETCH;
 							
 							-- [05] Rd<=Ra-Rb (2 byte)
 							elsif	REG_CMD(23 downto 19)="00101" then
 									REG_ACCx<=signed(REG_A)-signed(REG_B);
-									REG_ACC<=std_logic_vector(REG_ACCx);
-									REG_ACC_EN<='1';
+									REG_ACCn<=std_logic_vector(REG_ACCx);
+									REG_ACC_ENn<='1';
 									
 									AUT_CPUn<=AUT_CPU_FETCH;
 							
 							-- [06] Rd<=Ra#Rb (2 byte)
 							elsif	REG_CMD(23 downto 19)="00110" then
-									REG_ACC<=REG_A or REG_B;
-									REG_ACC_EN<='1';
+									REG_ACCn<=REG_A or REG_B;
+									REG_ACC_ENn<='1';
 									
 									AUT_CPUn<=AUT_CPU_FETCH;
 							
 							-- [07] Rd<=Ra&Rb (2 byte)
 							elsif	REG_CMD(23 downto 19)="00111" then
-									REG_ACC<=REG_A and REG_B;
-									REG_ACC_EN<='1';
+									REG_ACCn<=REG_A and REG_B;
+									REG_ACC_ENn<='1';
 									
 									AUT_CPUn<=AUT_CPU_FETCH;
 							
@@ -265,6 +304,8 @@ architecture CPU_module of CPU is
 									
 							-- [09] Rd=>RAM(RaoRb) (2 byte)
 							elsif	REG_CMD(23 downto 19)="01001" then
+							-- bedzie problem, bo chcemy czytac naraz z trzech rejestrow
+							-- musimy spamietac na boku albo RaoRb albo Rd
 							
 									AUT_CPUn<=AUT_CPU_FETCH;
 									
@@ -273,32 +314,34 @@ architecture CPU_module of CPU is
 									REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
 									REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
 									
-									AUT_CPUn<=AUT_CPU_FETCH;
+									AUT_CPUn<=AUT_CPU_RAM_RD1;
 									
 							-- [0B] Rd=>RAM(A) (3 byte)
 							elsif	REG_CMD(23 downto 19)="01011" then
 									REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
 									REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
+									ADDR_REG_A <= ADDR_REG_ACC; -- Rd becomes source
 									
-									AUT_CPUn<=AUT_CPU_FETCH;
+									AUT_CPUn<=AUT_CPU_RAM_WR1;
 									
 							-- [0C] Rd<=INP(A) (2 byte)
 							elsif	REG_CMD(23 downto 19)="01100" then
 									REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
 									
-									AUT_CPUn<=AUT_CPU_FETCH;
+									AUT_CPUn<=AUT_CPU_IN1;
 									
 							-- [0D] Rd=>OUT(A) (2 byte)
 							elsif	REG_CMD(23 downto 19)="01101" then
 									--REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
 									REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
+									ADDR_REG_A <= ADDR_REG_ACC; -- Rd becomes source
 									
 									AUT_CPUn<=AUT_CPU_OUT1;
 									
 							-- [0E] Rd<=DI (2 byte)
 							elsif	REG_CMD(23 downto 19)="01110" then
-									REG_ACC<=REG_CMD(15 downto 8);
-									REG_ACC_EN<='1';
+									REG_ACCn<=REG_CMD(15 downto 8);
+									REG_ACC_ENn<='1';
 									
 									AUT_CPUn<=AUT_CPU_FETCH;
 									
@@ -323,7 +366,7 @@ architecture CPU_module of CPU is
 							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
 							SIG_IS_WR<='1';
 							
-							ADDR_REG_A<=REG_CMD(18 downto 16);
+							ADDR_REG_A <= ADDR_REG_ACC;
 							REG_DATAn<=REG_A;
 							
 							SIG_BUS_START<='1';
@@ -333,59 +376,126 @@ architecture CPU_module of CPU is
 							REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
 							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
 							SIG_IS_WR<='1';
-							REG_DATAn<=REG_DATA;
-							--?
+							
+							ADDR_REG_A <= ADDR_REG_ACC;
+							REG_DATAn<=REG_A;
+							
 							if SIG_BUS_STOP='0' then
 								AUT_CPUn<=AUT_CPU_RAM_WR2;
 							else
-								AUT_CPUn<=AUT_CPU_RAM_WR3;
+								AUT_CPUn<=AUT_CPU_FETCH;
 							end if;
 							
-						when AUT_CPU_RAM_WR3 =>
+--						when AUT_CPU_RAM_WR3 =>
+--							REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
+--							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
+--							SIG_IS_WR<='1';
+--							REG_DATAn<=REG_DATA;
+--							
+--							AUT_CPUn<=AUT_CPU_FETCH;
+						
+						when AUT_CPU_RAM_RD1 =>
 							REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
 							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
-							SIG_IS_WR<='1';
-							REG_DATAn<=REG_DATA;
+							SIG_IS_WR<='0';
 							
-							AUT_CPUn<=AUT_CPU_FETCH;
+							SIG_BUS_START<='1';
+							AUT_CPUn<=AUT_CPU_RAM_RD2;
+							
+						when AUT_CPU_RAM_RD2 =>
+							REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
+							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
+							SIG_IS_WR<='0';
+							REG_DATAn<=SIG_DATA;
+							--?
+							if SIG_BUS_STOP='0' then
+								AUT_CPUn<=AUT_CPU_RAM_RD2;
+							else
+								REG_ACCn<=REG_DATAn;
+								REG_ACC_ENn<='1';	-- now write data to Rd
+								AUT_CPUn<=AUT_CPU_FETCH;
+							end if;
+							
+--						when AUT_CPU_RAM_RD3 =>
+--							REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
+--							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
+--							SIG_IS_WR<='0';
+--							REG_DATAn<=SIG_DATA;
+--							REG_ACCn<=REG_DATA;
+--							REG_ACC_ENn<='1';	-- now write data to Rd
+--							AUT_CPUn<=AUT_CPU_FETCH;
 						
 						when AUT_CPU_OUT1 =>
-							--REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
 							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
+							ADDR_REG_A <= ADDR_REG_ACC; -- Rd becomes source
 							SIG_IS_WR<='1';
 							SIG_IS_IO<='1';
 							
-							ADDR_REG_A<=REG_CMD(18 downto 16);
 							REG_DATAn<=REG_A;
 							SIG_BUS_START<='1';
-							--SIG_BUS_START<='1';
 							AUT_CPUn<=AUT_CPU_OUT2;
 							
 						when AUT_CPU_OUT2 =>
-							--REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
 							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
+							ADDR_REG_A <= ADDR_REG_ACC; -- Rd becomes source
 							SIG_IS_WR<='1';
 							SIG_IS_IO<='1';
 							
-							REG_DATAn<=REG_DATA;
-							--?
+							REG_DATAn<=REG_A;
 							if SIG_BUS_STOP='0' then
 								AUT_CPUn<=AUT_CPU_OUT2;
 							else
-								AUT_CPUn<=AUT_CPU_OUT3;
+								AUT_CPUn<=AUT_CPU_FETCH;
 							end if;
 							
-						when AUT_CPU_OUT3 =>
+--						when AUT_CPU_OUT3 =>
+--							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
+--							ADDR_REG_A <= ADDR_REG_ACC; -- Rd becomes source
+--							SIG_IS_WR<='1';
+--							SIG_IS_IO<='1';
+--							
+--							REG_DATAn<=REG_DATA;
+--							
+--							AUT_CPUn<=AUT_CPU_FETCH;
+							
+						when AUT_CPU_IN1 =>
 							--REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
 							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
-							SIG_IS_WR<='1';
+							SIG_IS_WR<='0';
 							SIG_IS_IO<='1';
 							
-							REG_DATAn<=REG_DATA;
+							SIG_BUS_START<='1';
+							--SIG_BUS_START<='1';
+							AUT_CPUn<=AUT_CPU_IN2;
+							
+						when AUT_CPU_IN2 =>
+							--REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
+							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
+							SIG_IS_WR<='0';
+							SIG_IS_IO<='1';
+							
+							REG_DATAn<=SIG_DATA;
+							--?
+							if SIG_BUS_STOP='0' then
+								AUT_CPUn<=AUT_CPU_IN2;
+							else
+								AUT_CPUn<=AUT_CPU_IN3;
+							end if;
+							
+						when AUT_CPU_IN3 =>
+							--REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
+							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
+							SIG_IS_WR<='0';
+							SIG_IS_IO<='1';
+							
+							REG_DATAn<=SIG_DATA;
+							REG_ACCn<=REG_DATA;
+							REG_ACC_ENn<='1';
 							
 							AUT_CPUn<=AUT_CPU_FETCH;
 						
 						when others =>
+							AUT_CPUn<=AUT_CPU;
 						
 					end case;
 				end process AUT_CPU_PROC;
@@ -393,7 +503,17 @@ architecture CPU_module of CPU is
 	AUT_BUS_PROC:
 		process (
 					AUT_BUS,
-					SIG_BUS_START
+					SIG_BUS_START,
+					REG_ADDR,
+					SIG_WAIT,
+					REG_ADDRESS,
+					SIG_IS_IO,
+					SIG_IS_WR,
+					SIG_MREQ,
+					SIG_IORQ,
+					SIG_RD,
+					SIG_WR,
+					SIG_DOUT
 				) is
 				
 			begin
@@ -402,6 +522,7 @@ architecture CPU_module of CPU is
 				SIG_IORQn<='1';
 				SIG_RDn<='1';
 				SIG_WRn<='1';
+				SIG_DOUTn<='1';
 				SIG_BUS_STOP<='0';
 				REG_ADDRn<=REG_ADDR;
 				
@@ -419,9 +540,18 @@ architecture CPU_module of CPU is
 							AUT_BUSn<=AUT_BUS_START;
 						else
 							AUT_BUSn<=AUT_BUS_CYCLE1;
+						if SIG_IS_WR='1' then
+							SIG_DOUTn<='0';
+						end if;
 					end if;
 					
+--					when AUT_BUS_WAIT2 =>
+--						REG_ADDRn<=REG_ADDRESS;
+--						
+--						AUT_BUSn<=AUT_BUS_CYCLE1;
+					
 					when AUT_BUS_CYCLE1 =>
+						SIG_DOUTn <= SIG_DOUT;
 						if SIG_IS_IO='0' then
 							SIG_MREQn<='0';
 						else
@@ -436,6 +566,7 @@ architecture CPU_module of CPU is
 						AUT_BUSn<=AUT_BUS_CYCLE2;
 						
 					when AUT_BUS_CYCLE2 =>
+						SIG_DOUTn <= SIG_DOUT;
 						SIG_MREQn<=SIG_MREQ;
 						SIG_IORQn<=SIG_IORQ;
 						SIG_RDn<=SIG_RD;
@@ -443,6 +574,7 @@ architecture CPU_module of CPU is
 						AUT_BUSn<=AUT_BUS_WAIT;
 						
 					when AUT_BUS_WAIT =>
+						SIG_DOUTn <= SIG_DOUT;
 						SIG_MREQn<=SIG_MREQ;
 						SIG_IORQn<=SIG_IORQ;
 						SIG_RDn<=SIG_RD;
@@ -450,11 +582,24 @@ architecture CPU_module of CPU is
 						if SIG_WAIT='0' then
 							AUT_BUSn<=AUT_BUS_WAIT;
 						else
+							AUT_BUSn<=AUT_BUS_WAIT3;
+						end if;
+					
+					when AUT_BUS_WAIT3 =>
+						SIG_DOUTn <= SIG_DOUT;
+						SIG_MREQn<=SIG_MREQ;
+						SIG_IORQn<=SIG_IORQ;
+						SIG_RDn<=SIG_RD;
+						SIG_WRn<=SIG_WR;
+						if SIG_WAIT='0' then
+							AUT_BUSn<=AUT_BUS_WAIT3;
+						else
 							AUT_BUSn<=AUT_BUS_STOP;
 						end if;
 						
 					when AUT_BUS_STOP =>
-						REG_ADDRn<=(others => '0');
+						--REG_ADDRn<=(others => '0');
+						REG_ADDRn<=REG_ADDRESS;
 						SIG_BUS_STOP<='1';
 						
 						if SIG_BUS_START='0' then
@@ -495,7 +640,7 @@ architecture CPU_module of CPU is
 			data=>REG_DATA, 
 			result=>SIG_DATA, 
 			tridata=>DATA,
-			enabledt=>not SIG_WR,
+			enabledt=>not SIG_DOUT,
 			enabletr=>not SIG_RD
 		);
 	
@@ -579,8 +724,11 @@ architecture CPU_module of CPU is
 						SIG_IORQ<=SIG_IORQn;
 						SIG_RD<=SIG_RDn;
 						SIG_WR<=SIG_WRn;
+						SIG_DOUT<=SIG_DOUTn;
 						REG_PC<=REG_PCn;
 						REG_CMD<=REG_CMDn;
+						REG_ACC_EN<=REG_ACC_ENn;
+						REG_ACC<=REG_ACCn;
 					end if;
 				end process CLOCK_PROC;
 				
@@ -588,4 +736,12 @@ architecture CPU_module of CPU is
 	D_AUT_CPU<=AUT_CPU;
 	D_AUT_BUS<=AUT_BUS;
 	D_PC<=REG_PC;
+	--D_DATA <= REG_DATA;
+	D_DATA <= REG_ADDR(7 downto 0);
+	
+	D_REG_ACC_EN	<= REG_ACC_EN;
+	D_ADDR_REG_A	<= ADDR_REG_A;
+	D_ADDR_REG_B	<= ADDR_REG_B;
+	D_ADDR_REG_ACC	<= ADDR_REG_ACC;
+	D_REG_A			<= REG_A;
 end architecture CPU_module;
