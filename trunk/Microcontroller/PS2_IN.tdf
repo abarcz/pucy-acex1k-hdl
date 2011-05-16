@@ -169,7 +169,7 @@ BEGIN
 						AUT_PS2_BUS = SPB1;
 					 else
 					    -- unblock after reset
-						SIG_WAIT.D = VCC;
+						SIG_WAIT.D = GND;
 						AUT_PS2_BUS = SPB0;
 					 end if;
 		% Wait for frame %
