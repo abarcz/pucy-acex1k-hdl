@@ -87,17 +87,20 @@ architecture CPU_module of CPU is
 	constant AUT_CPU_EXE			:	std_logic_vector (4 downto 0) := "01000";
 	constant AUT_CPU_RAM_WR1		:	std_logic_vector (4 downto 0) := "01001";
 	constant AUT_CPU_RAM_WR2		:	std_logic_vector (4 downto 0) := "01010";
-	constant AUT_CPU_RAM_WR3		:	std_logic_vector (4 downto 0) := "01011";
+	
 	constant AUT_CPU_OUT1			:	std_logic_vector (4 downto 0) := "01100";
 	constant AUT_CPU_OUT2			:	std_logic_vector (4 downto 0) := "01101";
-	constant AUT_CPU_OUT3			:	std_logic_vector (4 downto 0) := "01110";
+
 	constant AUT_CPU_IN1			:	std_logic_vector (4 downto 0) := "01111";
 	constant AUT_CPU_IN2			:	std_logic_vector (4 downto 0) := "10000";
 	constant AUT_CPU_IN3			:	std_logic_vector (4 downto 0) := "10001";
-	constant AUT_CPU_FETCH2			:	std_logic_vector (4 downto 0) := "10010";
+	
 	constant AUT_CPU_RAM_RD1		:	std_logic_vector (4 downto 0) := "10011";
 	constant AUT_CPU_RAM_RD2		:	std_logic_vector (4 downto 0) := "10100";
-	constant AUT_CPU_RAM_RD3		:	std_logic_vector (4 downto 0) := "10101";
+	constant AUT_CPU_MUL			:	std_logic_vector (4 downto 0) := "10101";
+	
+	constant AUT_CPU_FETCH2			:	std_logic_vector (4 downto 0) := "11111";
+
 	-- Bus communication state machine ( mreq, iorq, rd, wr etc. )
 	signal AUT_BUS			:	std_logic_vector (2 downto 0);
 	signal AUT_BUSn			:	std_logic_vector (2 downto 0);
@@ -120,9 +123,22 @@ architecture CPU_module of CPU is
 	signal REG_ACC			:	std_logic_vector (7 downto 0);		-- Accumulator Register
 	signal REG_ACCn			:	std_logic_vector (7 downto 0);		-- Accumulator Register
 	signal REG_ACCx			:	std_logic_vector (7 downto 0);		-- Accumulator Reg. inter.
-	signal MULTI_RES		:	std_logic_vector (15 downto 0);		-- Multiplication result
+	signal MUL_RES			:	std_logic_vector (7 downto 0);		-- Multiplication result
+	signal MUL_GO			: 	std_logic;							-- 0 => starts MUL operation
+	signal MUL_READY		:	std_logic;							-- 0 => MUL result ready
 	
-	
+	component MUL is 
+		port (
+			GEN		: in std_logic;
+			RESET	: in std_logic;
+			A 		: in std_logic_vector (7 downto 0);
+			B 		: in std_logic_vector (7 downto 0);
+			RESULT 	: out std_logic_vector (7 downto 0);-- wynik mnozenia
+			GO		: in std_logic;		-- uruchamia MUL, aktywne LOW
+			READY	: out std_logic		-- czy wynik gotowy? (LOW)
+		);
+	end component MUL;
+	 
 	begin
 
 	AUT_CPU_PROC:
@@ -138,7 +154,9 @@ architecture CPU_module of CPU is
 					REG_B,
 					REG_ACCx,
 					REG_ACC,
-					ADDR_REG_ACC
+					ADDR_REG_ACC,
+					MUL_READY,
+					MUL_RES
 					--
 					--
 					--
@@ -163,6 +181,7 @@ architecture CPU_module of CPU is
 					SIG_IS_WR<='0';
 					REG_PCx<=unsigned(REG_PC)+1;
 					--
+					MUL_GO <= '1';
 					
 					case AUT_CPU is		
 						when AUT_CPU_FETCH =>
@@ -250,7 +269,11 @@ architecture CPU_module of CPU is
 								  
 							-- [01] JMP Rd=0,A (2 byte)
 							elsif 	REG_CMD(23 downto 19)="00001" then
-									--
+									if signed(REG_ACC) = 0 then
+										REG_PCn(15 downto 8)<="00000000";
+										REG_PCn(7 downto 0)<=REG_CMD(15 downto 8);
+									end if;
+									
 									AUT_CPUn<=AUT_CPU_FETCH;
 							
 							-- [02] JMP A (2 byte)
@@ -297,12 +320,12 @@ architecture CPU_module of CPU is
 									
 									AUT_CPUn<=AUT_CPU_FETCH;
 							
-							-- [08] Rd<=RAM(RaoRb) (2 byte)
+							-- [08] Rd<=RAM(RaoRb) (2 byte) NIETESTOWANE
 							elsif	REG_CMD(23 downto 19)="01000" then
 							--
 									AUT_CPUn<=AUT_CPU_FETCH;
 									
-							-- [09] Rd=>RAM(RaoRb) (2 byte)
+							-- [09] Rd=>RAM(RaoRb) (2 byte) NIETESTOWANE
 							elsif	REG_CMD(23 downto 19)="01001" then
 							-- bedzie problem, bo chcemy czytac naraz z trzech rejestrow
 							-- musimy spamietac na boku albo RaoRb albo Rd
@@ -324,7 +347,7 @@ architecture CPU_module of CPU is
 									
 									AUT_CPUn<=AUT_CPU_RAM_WR1;
 									
-							-- [0C] Rd<=INP(A) (2 byte)
+							-- [0C] Rd<=INP(A) (2 byte) NIETESTOWANE
 							elsif	REG_CMD(23 downto 19)="01100" then
 									REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
 									
@@ -350,10 +373,10 @@ architecture CPU_module of CPU is
 							
 									AUT_CPUn<=AUT_CPU_EXE;
 									
-							-- [1E] Rd<=Ra op Rb (2 byte)
+							-- [1E] Rd<=Ra op Rb (2 byte) op == multiply
 							elsif	REG_CMD(23 downto 19)="11110" then
-							
-									AUT_CPUn<=AUT_CPU_FETCH;
+									MUL_GO <= '0';	-- start multiplication
+									AUT_CPUn<=AUT_CPU_MUL;
 									
 							--
 							-- Command unknown
@@ -385,14 +408,6 @@ architecture CPU_module of CPU is
 							else
 								AUT_CPUn<=AUT_CPU_FETCH;
 							end if;
-							
---						when AUT_CPU_RAM_WR3 =>
---							REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
---							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
---							SIG_IS_WR<='1';
---							REG_DATAn<=REG_DATA;
---							
---							AUT_CPUn<=AUT_CPU_FETCH;
 						
 						when AUT_CPU_RAM_RD1 =>
 							REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
@@ -411,19 +426,10 @@ architecture CPU_module of CPU is
 							if SIG_BUS_STOP='0' then
 								AUT_CPUn<=AUT_CPU_RAM_RD2;
 							else
-								REG_ACCn<=REG_DATAn;
+								REG_ACCn<=SIG_DATA;
 								REG_ACC_ENn<='1';	-- now write data to Rd
 								AUT_CPUn<=AUT_CPU_FETCH;
 							end if;
-							
---						when AUT_CPU_RAM_RD3 =>
---							REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
---							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
---							SIG_IS_WR<='0';
---							REG_DATAn<=SIG_DATA;
---							REG_ACCn<=REG_DATA;
---							REG_ACC_ENn<='1';	-- now write data to Rd
---							AUT_CPUn<=AUT_CPU_FETCH;
 						
 						when AUT_CPU_OUT1 =>
 							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
@@ -447,16 +453,6 @@ architecture CPU_module of CPU is
 							else
 								AUT_CPUn<=AUT_CPU_FETCH;
 							end if;
-							
---						when AUT_CPU_OUT3 =>
---							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
---							ADDR_REG_A <= ADDR_REG_ACC; -- Rd becomes source
---							SIG_IS_WR<='1';
---							SIG_IS_IO<='1';
---							
---							REG_DATAn<=REG_DATA;
---							
---							AUT_CPUn<=AUT_CPU_FETCH;
 							
 						when AUT_CPU_IN1 =>
 							--REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
@@ -493,6 +489,17 @@ architecture CPU_module of CPU is
 							REG_ACC_ENn<='1';
 							
 							AUT_CPUn<=AUT_CPU_FETCH;
+							
+							MUL_GO <= '0';	-- start multiplication
+							
+						when AUT_CPU_MUL =>
+							if MUL_READY = '0' then
+								REG_ACCn <= MUL_RES;
+								REG_ACC_ENn <= '1';
+								AUT_CPUn <= AUT_CPU_FETCH;
+							else
+								AUT_CPUn <= AUT_CPU_MUL;
+							end if;
 						
 						when others =>
 							AUT_CPUn<=AUT_CPU;
@@ -545,11 +552,6 @@ architecture CPU_module of CPU is
 						end if;
 					end if;
 					
---					when AUT_BUS_WAIT2 =>
---						REG_ADDRn<=REG_ADDRESS;
---						
---						AUT_BUSn<=AUT_BUS_CYCLE1;
-					
 					when AUT_BUS_CYCLE1 =>
 						SIG_DOUTn <= SIG_DOUT;
 						if SIG_IS_IO='0' then
@@ -582,23 +584,26 @@ architecture CPU_module of CPU is
 						if SIG_WAIT='0' then
 							AUT_BUSn<=AUT_BUS_WAIT;
 						else
-							AUT_BUSn<=AUT_BUS_WAIT3;
+							if SIG_IS_IO = '1' then
+								AUT_BUSn<=AUT_BUS_WAIT2;
+							else
+								AUT_BUSn<=AUT_BUS_STOP;
+							end if;
 						end if;
 					
-					when AUT_BUS_WAIT3 =>
+					when AUT_BUS_WAIT2 => -- for IO only
 						SIG_DOUTn <= SIG_DOUT;
 						SIG_MREQn<=SIG_MREQ;
 						SIG_IORQn<=SIG_IORQ;
 						SIG_RDn<=SIG_RD;
 						SIG_WRn<=SIG_WR;
 						if SIG_WAIT='0' then
-							AUT_BUSn<=AUT_BUS_WAIT3;
+							AUT_BUSn<=AUT_BUS_WAIT2;
 						else
 							AUT_BUSn<=AUT_BUS_STOP;
 						end if;
 						
 					when AUT_BUS_STOP =>
-						--REG_ADDRn<=(others => '0');
 						REG_ADDRn<=REG_ADDRESS;
 						SIG_BUS_STOP<='1';
 						
@@ -609,7 +614,7 @@ architecture CPU_module of CPU is
 						end if;
 			
 					when others =>
-						REG_ADDRn<=(others => '0');
+						REG_ADDRn<=REG_ADDRESS;
 						SIG_BUS_STOP<='1';
 						
 						if SIG_BUS_START='0' then
@@ -629,6 +634,8 @@ architecture CPU_module of CPU is
 	
 	D_REGADDRn <= REG_ADDRn;
 	D_REG_ADDRESS <= REG_ADDRESS;
+	
+	mul0: MUL port map (GEN, RESET, REG_A, REG_B, MUL_RES, MUL_GO, MUL_READY);
 			
 	e0: lpm_bustri
 		generic map 

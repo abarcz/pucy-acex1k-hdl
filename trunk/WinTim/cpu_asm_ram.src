@@ -15,10 +15,11 @@ FORM 	11111B111B1111B1111B11111111	; format for .LST binary code output (5-3-4-4
 ; PROGRAM AREA
 ;*********************************
 	ORG H#00
-START:	IN R0, H#50
-	OUT R0, H#10
-	JORG
-		
+START:	MOVI R0, H#11
+	SWI R0, H#1000
+	LWI R0, H#1000
+	
+	
 
 
 ;********************************
