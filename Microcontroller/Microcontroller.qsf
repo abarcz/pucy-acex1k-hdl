@@ -114,6 +114,9 @@ set_location_assignment PIN_97 -to P_5[2]
 set_location_assignment PIN_96 -to P_5[1]
 set_location_assignment PIN_95 -to P_5[0]
 set_global_assignment -name MISC_FILE "E:/various/_PW/PUCY/Projekt_svn/Microcontroller/Microcontroller.dpf"
+set_global_assignment -name MISC_FILE "C:/Users/user/Desktop/PUCY 1105/Microcontroller/Microcontroller.dpf"
+set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE M1.vwf
+set_global_assignment -name VHDL_FILE MUL.vhd
 set_global_assignment -name VECTOR_WAVEFORM_FILE RAM_50ns.vwf
 set_global_assignment -name VECTOR_WAVEFORM_FILE ROM_50ns.vwf
 set_global_assignment -name VHDL_FILE CPU.vhd
@@ -129,5 +132,3 @@ set_global_assignment -name VHDL_FILE RAM.vhd
 set_global_assignment -name VHDL_FILE ROM.vhd
 set_global_assignment -name VHDL_FILE Microcontroller.vhd
 set_global_assignment -name VECTOR_WAVEFORM_FILE M1.vwf
-set_global_assignment -name MISC_FILE "C:/Users/user/Desktop/PUCY 1105/Microcontroller/Microcontroller.dpf"
-set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE M1.vwf

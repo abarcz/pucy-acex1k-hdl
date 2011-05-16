@@ -1,0 +1,22 @@
+-- FPGA-CPU TEST PROGRAM
+-- Altera Instruction Memory Initialization File
+Depth = 90;
+Width = 8;
+Address_radix = HEX;
+Data_radix = HEX;
+Content
+Begin
+-- Use NOPS for default instruction memory values
+    [0C..59]: 78; -- nop
+-- Place MIPS Instructions here
+-- Note: memory addresses are in words and not bytes
+-- i.e. next location is +1 and not +4
+
+-- TEST for MOVI, LWI, SWI & OUT => works (nop from 0C)
+	00: 70 11;   -- START:	MOVI R0, H#11
+	02: 58 00 10;   -- 	SWI R0, H#0010
+	05: 70 23;   -- MOVI R0, H#23
+    07: 50 00 10;   -- 	LWI R0, H#0010
+	0A: 68 10; -- 	OUT R0, H#10
+
+End;

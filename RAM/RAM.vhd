@@ -1,10 +1,5 @@
 --	Blok pamieci RAM	: 1099B
 --	Przestrzen adresowa	: 0x1000..0x144A (4096..5194)
---	Czas ustalenia sie D przy odczycie: 25ns
---	Czas wyjscia z szyny D po cofnieciu MRQ i RD: 20ns
---	Czas zapisu: 10ns (!MRQ&!WR&A), 
---	 ale po cofnieciu MRQ i WR: A i D musza pozostac niezmienione przez 10ns
---	Poniewaz T(CPU) = 1/f = 50ns > 25ns > 10ns, RAM nie wystawia sygnalu WT.
 
 --	Wersja z zatrzaskiwaniem:
 --	Czas ustalenia sie D przy odczycie: 30ns
@@ -32,7 +27,7 @@ entity RAM is
 --	V_CSW : out std_logic;
 --	V_LD : out std_logic_vector (7 downto 0);
 --	V_LA : out std_logic_vector (10 downto 0);
---	V_RIO : out std_logic_vector (7 downto 0) 
+--	V_DOUT : out std_logic_vector (7 downto 0) 
 	);
 	
 end entity RAM;
@@ -41,8 +36,7 @@ architecture arch_RAM of RAM is
 	signal CSEL, CSW, CSR	: std_logic; -- zdekodowane sygnal wyboru pamieci RAM
 	signal LD	: std_logic_vector (7 downto 0);	-- zalatchowany sygnal D[]
 	signal LA	: std_logic_vector (10 downto 0);	-- zalatchowany sygnal A[]
-	signal RIO	: std_logic_vector (7 downto 0);	-- szyna trojstanowa do podlaczenia RAMu
-	
+	signal DOUT	: std_logic_vector (7 downto 0);	-- sygnal wyjsciowy D[]
 	
 
 	begin
@@ -50,7 +44,7 @@ architecture arch_RAM of RAM is
 --		V_CSW <= CSW;
 --		V_LA <= LA;
 --		V_LD <= LD;
---		V_RIO <= RIO;
+--		V_DOUT <= DOUT;
 		
 	
 	-- zatrzasnij D[] dla WR
@@ -81,34 +75,14 @@ architecture arch_RAM of RAM is
 				then CSR <= '1'; else CSR <= '0'; end if;
 		end process sr;
 			
-	-- zdekodowanie sygnalu chip select
-	cs: process (A, MRQ) is
-		begin 
-			if (((unsigned(A))>=base_addr) and ((unsigned(A))<=last_addr) and (MRQ='0'))
-				then CSEL <= '1'; else CSEL <= '0'; end if;	-- chip select
-		end process cs;
-		
-	-- pamiec RAM
---	e0: lpm_ram_io
---		generic map (LPM_WIDTH=>8, LPM_WIDTHAD=>11, LPM_NUMWORDS=>1099,
---				LPM_INDATA => "UNREGISTERED", LPM_OUTDATA => "UNREGISTERED",
---				LPM_ADDRESS_CONTROL => "UNREGISTERED")
---		port map (dio => RIO, address => LA, memenab => CSEL,
---					we => not WR, outenab => not RD);
-	
 	e0: lpm_ram_dq
-		generic map (LPM_WIDTH=>8, LPM_WIDTHAD=>11, LPM_NUMWORDS=>1099,
+		generic map (LPM_WIDTH=>8, LPM_WIDTHAD=>9, LPM_NUMWORDS=>512,
 				LPM_INDATA => "UNREGISTERED", LPM_OUTDATA => "UNREGISTERED",
 				LPM_ADDRESS_CONTROL => "UNREGISTERED")
-		port map (data => LD, address=> LA, we => CSW, q => RIO);
-		
-	-- trojstanowa szyna danych do podlaczenia RAMu z zatrzasnietym D[]
---	t1: lpm_bustri
---		generic map (LPM_WIDTH=>8)
---		port map (data => LD, enabledt => CSW, enabletr => CSR, result => D, tridata => RIO);
+		port map (data => LD, address=> LA(8 downto 0), we => CSW, q => DOUT);
 		
 	t1: lpm_bustri
 		generic map (LPM_WIDTH=>8)
-		port map (data => RIO, enabledt => CSR, tridata => D);
+		port map (data => DOUT, enabledt => CSR, tridata => D);
 		
 end architecture arch_RAM;
