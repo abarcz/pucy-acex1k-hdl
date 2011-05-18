@@ -38,28 +38,24 @@ architecture arch_RAM of RAM is
 	signal LA	: std_logic_vector (10 downto 0);	-- zalatchowany sygnal A[]
 	signal DOUT	: std_logic_vector (7 downto 0);	-- sygnal wyjsciowy D[]
 	
-
 	begin
 --		V_CSR <= CSR;
 --		V_CSW <= CSW;
 --		V_LA <= LA;
 --		V_LD <= LD;
 --		V_DOUT <= DOUT;
-		
 	
-	-- zatrzasnij D[] dla WR
-	l1: process (A, MRQ, D) is
+		-- zatrzasnij D[] i A[] dla WR
+	l1: process (A, MRQ, WR, D, LA, LD) is
 		begin
-			if (((unsigned(A))>=base_addr) and ((unsigned(A))<=last_addr) and falling_edge(MRQ))
-				then LD <= D; end if;
+			if ((MRQ = '1') and (WR = '1')) then 
+				LD <= D; 
+				LA <= A(10 downto 0); 
+			else
+				LD <= LD;
+				LA <= LA;
+			end if;
 		end process l1;
-	
-	-- zatrzasnij A[] dla WR
-	l2: process (A, MRQ) is
-		begin
-			if (((unsigned(A))>=base_addr) and ((unsigned(A))<=last_addr) and falling_edge(MRQ))
-				then LA <= A(10 downto 0); end if;
-		end process l2;
 		
 	-- zdekodowanie sygnalu WR
 	sw: process (A, MRQ, WR) is
