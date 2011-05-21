@@ -1,5 +1,6 @@
---	Blok pamieci RAM	: 1099B
---	Przestrzen adresowa	: 0x1000..0x144A (4096..5194)
+--	Blok pamieci RAM	: 1099B -> ograniczona do 1024B ze wzgledu na ilosc EAB
+--	Przestrzen adresowa	: 0x1000..0x144A (4096..5194) 
+--						-> 0x1000..0x1399 (4096..5119)
 
 --	Wersja z zatrzaskiwaniem:
 --	Czas ustalenia sie D przy odczycie: 30ns
@@ -18,7 +19,7 @@ use altera.altera_primitives_components.all;
 
 entity RAM is
 	generic (	base_addr	: natural := 4096;	-- adres bazowy w przestrzeni adr
-				last_addr	: natural := 5194 );-- ostatni adres w przestrzeni adr	
+				last_addr	: natural := 4608 );-- ostatni adres w przestrzeni adr	
 
 	port (	A	: in std_logic_vector (15 downto 0);
 			D	: inout std_logic_vector (7 downto 0);
@@ -72,10 +73,10 @@ architecture arch_RAM of RAM is
 		end process sr;
 			
 	e0: lpm_ram_dq
-		generic map (LPM_WIDTH=>8, LPM_WIDTHAD=>9, LPM_NUMWORDS=>512,
+		generic map (LPM_WIDTH=>8, LPM_WIDTHAD=>10, LPM_NUMWORDS=>1024,
 				LPM_INDATA => "UNREGISTERED", LPM_OUTDATA => "UNREGISTERED",
 				LPM_ADDRESS_CONTROL => "UNREGISTERED")
-		port map (data => LD, address=> LA(8 downto 0), we => CSW, q => DOUT);
+		port map (data => LD, address=> LA(9 downto 0), we => CSW, q => DOUT);
 		
 	t1: lpm_bustri
 		generic map (LPM_WIDTH=>8)

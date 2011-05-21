@@ -9,19 +9,16 @@ library altera;
 use altera.altera_primitives_components.all;
 
 entity Microcontroller is
+	generic (
+				ext_io_addr	: natural := 4609		-- pierwszy adres zewn. IO
+	);
 	port (		GEN		: in std_logic;
 				
-				-- wyjscie na szyne zewnetrzna
-				--OUT_A		: out std_logic_vector(15 downto 0);
-				--OUT_D		: out std_logic_vector(7 downto 0);
-				--OUT_MRQ, OUT_IORQ, OUT_RD, OUT_WR : out std_logic;
-				
-				-- debug
-				V_A		: inout std_logic_vector(15 downto 0);
+				-- wyjscie na szyne zewnetrzna (:TODO: przypisanie pinow)
+				V_A		: out std_logic_vector(15 downto 0);
 				VI_D	: inout std_logic_vector(7 downto 0);
-				--VO_D	: out std_logic_vector(7 downto 0);
-				V_MRQ, V_IORQ, V_RD, V_WR : inout std_logic;
-				V_WT	: buffer std_logic;
+				V_MRQ, V_IORQ, V_RD, V_WR : out std_logic;
+				V_WT	: inout std_logic;
 				
 				-- sygnaly WE / WY
 				L_A		: out std_logic_vector(7 downto 0); -- diody gorny rzad
@@ -65,7 +62,11 @@ architecture arch_Microcontroller of Microcontroller is
 	-- sygnal z LPT sygnalizujacy gotowosc drukarki
 	signal LPT_READY	: std_logic;
 	
-	signal DEB8			: std_logic_vector(7 downto 0);
+	-- sygnal zezwalajacy na wejscie sygnalu V_WT z zewnatrz
+	signal EXTERN_IO_SEL: std_logic;
+	
+	-- zatrzasniety stan szyny danych z ostatniej operacji
+	signal D_LATCH		: std_logic_vector (7 downto 0);
 	
 	signal DX_DATA		: std_logic_vector (7 downto 0);
 	
@@ -119,7 +120,7 @@ architecture arch_Microcontroller of Microcontroller is
 				LDATASYN	: out std_logic_vector (7 downto 0)  -- SV5: dane do LPT
 			);
 	end component LPT_OUT;
-	--e3:	PS2_IN port map (GEN, RESET, V_A(7 downto 0), VI_D, V_WT, V_IORQ, V_RD, PS2_KEYNUM, P_4);
+
 	component PS2_IN is
 		port ( 	GEN		: in std_logic;	-- 20MHz clock 
 				RESET	: in std_logic;	-- Reset signal from uC
@@ -137,37 +138,54 @@ architecture arch_Microcontroller of Microcontroller is
 	end component PS2_IN;
 	
 	begin
-		--OUT_A <= B_A; OUT_D <= B_D;
-		--OUT_MRQ <= B_MRQ; OUT_IORQ <= B_IORQ; OUT_RD <= B_RD; OUT_WR <= B_WR;
-		
-		-- :TODO: do podzespolow powinny dochodzic tylko sygnaly B_x, nie V_x!
-		-- debug
-		--DEB8 <= "10101010";
-		--P_1 <= DEB8;
-		
-		B_A <= V_A; 
-		B_D <= VI_D; -- :TODO: B_D nieuzywane, uzyte VI_D!
-		--VO_D <= B_D;
-		B_MRQ <= V_MRQ; B_IORQ <= V_IORQ; B_RD <= V_RD; B_WR <= V_WR; V_WT<=B_WT;
+		-- przepisanie stanu wewnetrznej szyny kontrolera na wyjscie
+		V_IORQ <= B_IORQ; 
+		V_MRQ <= B_MRQ; 
+		V_RD <= B_RD; 
+		V_WR <= B_WR; 
+		V_A <= B_A;
 		
 		-- sygnal resetujacy z przelacznika 3
 		RESET		<= SW3B;
 
 		-- sygnalizacja na diodach
 		L_A			<= (LPT_READY & V_WT & "101" & PS2_KEYNUM(2 downto 0));
-		L_B			<= DX_DATA; -- :TODO: powinno byc B_D
+		L_B			<= D_LATCH; --DX_DATA;
 		
+	-- zatrzasniecie stanu linii danych przy kazdej operacji IO / MEM (debug)
+	dl: process (VI_D, B_MRQ, B_IORQ, D_LATCH) is
+		begin
+			if ((B_MRQ = '0') OR (B_IORQ = '0')) then
+				D_LATCH(7 downto 0) <= VI_D(7 downto 0);
+			else
+				D_LATCH(7 downto 0) <= D_LATCH(7 downto 0);
+			end if;
+		end process;
 		
+	-- wybranie wejscia WT z zewnetrznego IO
+	extern_io: process (B_IORQ, B_A) is
+		begin
+			if ((B_IORQ = '0') AND (unsigned(B_A) >= ext_io_addr)) then
+				EXTERN_IO_SEL <= '1';
+			else
+				EXTERN_IO_SEL <= '0';
+			end if;
+		end process;
 		
-	e9: CPU port map (GEN, RESET, V_A, VI_D, V_MRQ, V_IORQ, V_WR, V_RD, B_WT, WAIT_CPU, DX_REG_ACC_EN,DX_ADDR_REG_A,DX_ADDR_REG_B,DX_ADDR_REG_ACC,DX_REG_A);
+	-- wpuszczenie zewnetrznego sygnalu WAIT na szyne przy wyborze urzadzenia IO	
+	t1: TRI port map (V_WT, EXTERN_IO_SEL, B_WT);
 	
-	e0: ROM port map (V_A, VI_D, V_MRQ, V_RD);
+	-- przepisanie wewnetrznego sygnalu WAIT na wyjscie
+	V_WT <= B_WT;
 	
-	e1: RAM port map (V_A, VI_D, V_MRQ, V_RD, V_WR);
+	e9: CPU port map (GEN, RESET, B_A, VI_D, B_MRQ, B_IORQ, B_WR, B_RD, B_WT, WAIT_CPU, DX_REG_ACC_EN,DX_ADDR_REG_A,DX_ADDR_REG_B,DX_ADDR_REG_ACC,DX_REG_A);
 	
-	e2: LPT_OUT port map (GEN, RESET, V_A(7 downto 0), VI_D, V_IORQ, V_WR, B_WT,LPT_READY, P_3, P_2, P_1);
-			
-	-- :TODO: Szyna D[] z PS2_IN nie jest trojstanowa - nie da sie podlaczyc				
-	e3:	PS2_IN port map (GEN, RESET, V_A(7 downto 0), VI_D, B_WT, V_IORQ, V_RD, PS2_KEYNUM, P_4);
+	e0: ROM port map (B_A, VI_D, B_MRQ, B_RD);
+	
+	e1: RAM port map (B_A, VI_D, B_MRQ, B_RD, B_WR);
+	
+	e2: LPT_OUT port map (GEN, RESET, B_A(7 downto 0), VI_D, B_IORQ, B_WR, B_WT,LPT_READY, P_3, P_2, P_1);
+							
+	e3:	PS2_IN port map (GEN, RESET, B_A(7 downto 0), VI_D, B_WT, B_IORQ, B_RD, PS2_KEYNUM, P_4);
 	
 end architecture arch_Microcontroller;
