@@ -18,7 +18,8 @@ entity Microcontroller is
 				V_A		: out std_logic_vector(15 downto 0);
 				VI_D	: inout std_logic_vector(7 downto 0);
 				V_MRQ, V_IORQ, V_RD, V_WR : out std_logic;
-				V_WT	: inout std_logic;
+				V_WT	: in std_logic;
+				V_WTO	: out std_logic;					-- wyjscie WT
 				
 				-- sygnaly WE / WY
 				L_A		: out std_logic_vector(7 downto 0); -- diody gorny rzad
@@ -178,7 +179,7 @@ architecture arch_Microcontroller of Microcontroller is
 	t1: TRI port map (V_WT, EXTERN_IO_SEL, B_WT);
 	
 	-- przepisanie wewnetrznego sygnalu WAIT na wyjscie
-	V_WT <= B_WT;
+	V_WTO <= B_WT;
 	
 	e9: CPU port map (GEN, RESET, B_A, VI_D, B_MRQ, B_IORQ, B_WR, B_RD, B_WT, WAIT_CPU, DX_REG_ACC_EN,DX_ADDR_REG_A,DX_ADDR_REG_B,DX_ADDR_REG_ACC,DX_REG_A);
 	
