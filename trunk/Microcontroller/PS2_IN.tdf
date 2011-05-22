@@ -286,7 +286,7 @@ BEGIN
 					 AUT_PS2_BUS = SPB5;
 		% Remove Wait, and wait for processor read %
 		when SPB7 => SIG_WAIT.D = VCC;
-					 CMD_READ.D = CMD_READ.Q;
+					 CMD_READ.D = GND;
 					 KEY_Z[] = KEY_Z[];
 					 KEY_D0[] = KEY_D0[];
 					 KEY_D1[] = KEY_D1[];
