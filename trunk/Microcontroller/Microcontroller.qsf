@@ -132,3 +132,4 @@ set_global_assignment -name VHDL_FILE RAM.vhd
 set_global_assignment -name VHDL_FILE ROM.vhd
 set_global_assignment -name VHDL_FILE Microcontroller.vhd
 set_global_assignment -name VECTOR_WAVEFORM_FILE M1.vwf
+set_global_assignment -name VECTOR_WAVEFORM_FILE PS2.vwf

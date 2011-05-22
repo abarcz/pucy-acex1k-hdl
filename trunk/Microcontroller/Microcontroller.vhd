@@ -149,8 +149,10 @@ architecture arch_Microcontroller of Microcontroller is
 		RESET		<= SW3B;
 
 		-- sygnalizacja na diodach
-		L_A			<= (LPT_READY & V_WT & "101" & PS2_KEYNUM(2 downto 0));
-		L_B			<= D_LATCH; --DX_DATA;
+		L_A(7 downto 2) <= (others => '0');		
+		L_A(1 downto 0) <= PS2_KEYNUM(7 downto 6);
+		L_B(7 downto 3) <= (others => '0');
+		L_B(2 downto 0) <= PS2_KEYNUM(2 downto 0);
 		
 	-- zatrzasniecie stanu linii danych przy kazdej operacji IO / MEM (debug)
 	dl: process (VI_D, B_MRQ, B_IORQ, D_LATCH) is
