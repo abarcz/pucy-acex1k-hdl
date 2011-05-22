@@ -121,12 +121,15 @@ BEGIN
 	S2U.SC_D1[] 			= KEY_D1[];
 	S2U.SC_D2[] 			= KEY_D2[];
 	
-	case PS2_CNT_BYTE[] is
-		when B"00"	=> PS2_DEBUG_PORT[] = 0;
-		when B"01"	=> PS2_DEBUG_PORT[] = 1;
-		when B"10"	=> PS2_DEBUG_PORT[] = 3;
-		when B"11"	=> PS2_DEBUG_PORT[] = 7;
-	end case;
+	
+--	case PS2_CNT_BYTE[] is
+--		when B"00"	=> PS2_DEBUG_PORT[] = 0;
+--		when B"01"	=> PS2_DEBUG_PORT[] = 1;
+--		when B"10"	=> PS2_DEBUG_PORT[] = 3;
+--		when B"11"	=> PS2_DEBUG_PORT[] = 7;
+--	end case;
+	
+	PS2_DEBUG_PORT[] = (Q1, Q0, GND, GND, GND, QB2, QB1, QB0);
 	
 	% tristate output data to D[] bus %
 	TRI_D[].oe 				= CMD_READ;
@@ -182,11 +185,15 @@ BEGIN
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
 					
-					 if(PS2_BYTE_READY.Q == 1) then
-						AUT_PS2_BUS = SPB2;
-					 else
-						AUT_PS2_BUS = SPB1;
-					 end if;
+					 -- DEBUG
+					 --if(PS2_BYTE_READY.Q == 1) then
+					 --	AUT_PS2_BUS = SPB2;
+					 --else
+					 --	AUT_PS2_BUS = SPB1;
+					 --end if;
+					 
+					 AUT_PS2_BUS = SPB2;
+					 
 		% Check if frame data is "F0" %
 		when SPB2 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
@@ -197,11 +204,15 @@ BEGIN
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
 					 
-					 if(PS2_BYTE[] == B"11110000") then
-						AUT_PS2_BUS = SPB3;
-					 else
-						AUT_PS2_BUS = SPB1;
-					 end if;
+					 -- Debug
+					 --if(PS2_BYTE[] == B"11110000") then
+					 --	AUT_PS2_BUS = SPB3;
+					 --else
+					 --	AUT_PS2_BUS = SPB1;
+					 --end if;
+					 
+					 AUT_PS2_BUS = SPB3;
+					 
 		% Wait for data frame ( after "F0" comes scancode of key ) %
 		when SPB3 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
@@ -212,11 +223,15 @@ BEGIN
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
 					 
-					 if(PS2_BYTE_READY.Q == 1) then
-						AUT_PS2_BUS = SPB4;
-					 else
-						AUT_PS2_BUS = SPB3;
-					 end if;
+					 --Debug
+					 --if(PS2_BYTE_READY.Q == 1) then
+					 --	AUT_PS2_BUS = SPB4;
+					 --else
+					 --	AUT_PS2_BUS = SPB3;
+					 --end if;
+					 
+					 AUT_PS2_BUS = SPB4;
+					 
 		% Write key scancode into correct buffer %
 		when SPB4 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
@@ -226,6 +241,7 @@ BEGIN
 					 CNT_DATA[] = CNT_DATA[];
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[]+1;
+					 
 					 
 					 case PS2_CNT_BYTE[] is
 						when 0 => KEY_Z[] = PS2_BYTE[];
@@ -237,6 +253,7 @@ BEGIN
 						when 3 => KEY_D0[] = PS2_BYTE[];
 								  AUT_PS2_BUS = SPB5;
 					 end case;
+					 
 		% Convert ZDDD to U2 and put it on data bus %
 		when SPB5 => CMD_READ.D = CMD_READ.Q;
 					 KEY_Z[] = KEY_Z[];
@@ -245,8 +262,10 @@ BEGIN
 					 KEY_D2[] = KEY_D2[];
 					 CNT_DATA[] = CNT_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
-			
-					 DFF_DATA[] = S2U.U2_LS[];
+					
+					 -- DEBUG
+					 --DFF_DATA[] = S2U.U2_LS[];
+					 DFF_DATA[] = B"00000101";
 					 
 					 if( CNT_DATA[] < 20 ) then
 						AUT_PS2_BUS = SPB6;
