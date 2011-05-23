@@ -1,0 +1,54 @@
+-- FPGA-CPU TEST PROGRAM
+-- Altera Instruction Memory Initialization File
+Depth = 90;
+Width = 8;
+Address_radix = HEX;
+Data_radix = HEX;
+Content
+Begin
+-- Use NOPS for default instruction memory values
+    [45..59]: 78; -- nop
+-- Place MIPS Instructions here
+-- Note: memory addresses are in words and not bytes
+-- i.e. next location is +1 and not +4
+
+-- TEST for arithmetical and logical operations => works (nop from 1A)
+	00: 60 50;   -- START:	IN R0, H#50
+    02: 61 50;   -- 	IN R1, H#50
+	-- 00: 70 03;   -- START:	MOVI R0, H#03
+    -- 02: 71 01;   -- 	MOVI R1, H#01
+    04: 28 01;   -- LOOP:	SUBA R0, R0, R1
+    06: 68 10;   -- 	OUT R0, H#10
+    08: 08 0C;   -- 	JZ R0, CD
+    0A: 10 04;   -- 	JMP LOOP
+    0C: 70 03;   -- CD:	MOVI R0, H#03
+    0E: 71 01;   -- 	MOVI R1, H#01
+    10: 72 12;   -- 	MOVI R2, H#12
+    12: 73 FF;   -- 	MOVI R3, H#FF
+    14: 24 12;   -- 	ADDA R4, R1, R2 ; 13
+    16: 6C 10;   -- 	OUT R4, H#10
+    18: 2D 32;   -- 	SUBA R5, R3, R2 ; ED
+    1A: 6D 10;   -- 	OUT R5, H#10
+    1C: 3E 54;   -- 	AND R6, R5, R4 ; 01
+    1E: 6E 10;   -- 	OUT R6, H#10
+    20: 37 24;   -- 	OR R7, R2, R4 ;13
+    22: 6F 10;   -- 	OUT R7, H#10
+    24: F1 70;   -- 	MUL R1, R7, R0 ;39
+    26: 69 10;   -- 	OUT R1, H#10
+    28: 5D 00 10;   -- 	SWI R5, H#0010 ;ED pod adresem 0x1000
+    2B: 59 11 10;   -- 	SWI R1, H#1110 ;39 pod adresem 0x1011
+    2E: 50 00 10;   -- 	LWI R0, H#0010 ;ED
+    31: 68 10;   -- 	OUT R0, H#10
+    33: 50 11 10;   -- 	LWI R0, H#1110 ;39
+    36: 68 10;   -- 	OUT R0, H#10
+    38: 4D 21;   -- 	SWR R5, R2, R1 ;ED pod adresem 0x1239
+    3A: 49 23;   -- 	SWR R1, R2, R3 ;39 pod adresem 0x12FF
+    3C: 40 21;   -- 	LWR R0, R2, R1 ;ED
+    3E: 68 10;   -- 	OUT R0, H#10
+    40: 40 23;   -- 	LWR R0, R2, R3 ;39
+    42: 68 10;   -- 	OUT R0, H#10
+    44: 00;   -- 	JORG
+End;
+
+	
+End;
