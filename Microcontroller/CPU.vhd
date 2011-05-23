@@ -88,6 +88,9 @@ architecture CPU_module of CPU is
 	constant AUT_CPU_RAM_WR1		:	std_logic_vector (4 downto 0) := "01001";
 	constant AUT_CPU_RAM_WR2		:	std_logic_vector (4 downto 0) := "01010";
 	
+	constant AUT_CPU_RAM_WR3		:	std_logic_vector (4 downto 0) := "11000";
+	constant AUT_CPU_RAM_WR4		:	std_logic_vector (4 downto 0) := "11001";
+	
 	constant AUT_CPU_OUT1			:	std_logic_vector (4 downto 0) := "01100";
 	constant AUT_CPU_OUT2			:	std_logic_vector (4 downto 0) := "01101";
 
@@ -98,6 +101,9 @@ architecture CPU_module of CPU is
 	constant AUT_CPU_RAM_RD1		:	std_logic_vector (4 downto 0) := "10011";
 	constant AUT_CPU_RAM_RD2		:	std_logic_vector (4 downto 0) := "10100";
 	constant AUT_CPU_MUL			:	std_logic_vector (4 downto 0) := "10101";
+	
+	constant AUT_CPU_RAM_RD3		:	std_logic_vector (4 downto 0) := "11010";
+	constant AUT_CPU_RAM_RD4		:	std_logic_vector (4 downto 0) := "11011";
 	
 	constant AUT_CPU_FETCH2			:	std_logic_vector (4 downto 0) := "11111";
 
@@ -322,15 +328,23 @@ architecture CPU_module of CPU is
 							
 							-- [08] Rd<=RAM(RaoRb) (2 byte) NIETESTOWANE
 							elsif	REG_CMD(23 downto 19)="01000" then
-							--
-									AUT_CPUn<=AUT_CPU_FETCH;
+									REG_ADDRESS(15 downto 8)<=REG_A(7 downto 0);
+									REG_ADDRESS(7 downto 0)<=REG_B(7 downto 0);
+									
+									
+									
+									AUT_CPUn<=AUT_CPU_RAM_RD3;
 									
 							-- [09] Rd=>RAM(RaoRb) (2 byte) NIETESTOWANE
 							elsif	REG_CMD(23 downto 19)="01001" then
 							-- bedzie problem, bo chcemy czytac naraz z trzech rejestrow
 							-- musimy spamietac na boku albo RaoRb albo Rd
+									REG_ADDRESS(15 downto 8)<=REG_A(7 downto 0);
+									REG_ADDRESS(7 downto 0)<=REG_B(7 downto 0);
+									
+									
 							
-									AUT_CPUn<=AUT_CPU_FETCH;
+									AUT_CPUn<=AUT_CPU_RAM_WR3;
 									
 							-- [0A] Rd<=RAM(A) (3 byte)
 							elsif	REG_CMD(23 downto 19)="01010" then
@@ -409,6 +423,32 @@ architecture CPU_module of CPU is
 								AUT_CPUn<=AUT_CPU_FETCH;
 							end if;
 						
+						when AUT_CPU_RAM_WR3 =>
+							REG_ADDRESS(15 downto 8)<=REG_A(7 downto 0);
+							REG_ADDRESS(7 downto 0)<=REG_B(7 downto 0);
+							SIG_IS_WR<='1';
+							
+							ADDR_REG_A <= ADDR_REG_ACC;
+							REG_DATAn<=REG_A;
+							
+							SIG_BUS_START<='1';
+							AUT_CPUn<=AUT_CPU_RAM_WR4;
+							
+						when AUT_CPU_RAM_WR4 =>
+							REG_ADDRESS(15 downto 8)<=REG_A(7 downto 0);
+							REG_ADDRESS(7 downto 0)<=REG_B(7 downto 0);
+							SIG_IS_WR<='1';
+							
+							ADDR_REG_A <= ADDR_REG_ACC;
+							REG_DATAn<=REG_A;
+							
+							if SIG_BUS_STOP='0' then
+								AUT_CPUn<=AUT_CPU_RAM_WR4;
+							else
+								AUT_CPUn<=AUT_CPU_FETCH;
+							end if;
+
+						
 						when AUT_CPU_RAM_RD1 =>
 							REG_ADDRESS(15 downto 8)<=REG_CMD(7 downto 0);
 							REG_ADDRESS(7 downto 0)<=REG_CMD(15 downto 8);
@@ -425,6 +465,28 @@ architecture CPU_module of CPU is
 							--?
 							if SIG_BUS_STOP='0' then
 								AUT_CPUn<=AUT_CPU_RAM_RD2;
+							else
+								REG_ACCn<=SIG_DATA;
+								REG_ACC_ENn<='1';	-- now write data to Rd
+								AUT_CPUn<=AUT_CPU_FETCH;
+							end if;
+						
+						when AUT_CPU_RAM_RD3 =>
+							REG_ADDRESS(15 downto 8)<=REG_A(7 downto 0);
+							REG_ADDRESS(7 downto 0)<=REG_B(7 downto 0);
+							SIG_IS_WR<='0';
+							
+							SIG_BUS_START<='1';
+							AUT_CPUn<=AUT_CPU_RAM_RD4;
+							
+						when AUT_CPU_RAM_RD4 =>
+							REG_ADDRESS(15 downto 8)<=REG_A(7 downto 0);
+							REG_ADDRESS(7 downto 0)<=REG_B(7 downto 0);
+							SIG_IS_WR<='0';
+							REG_DATAn<=SIG_DATA;
+							--?
+							if SIG_BUS_STOP='0' then
+								AUT_CPUn<=AUT_CPU_RAM_RD4;
 							else
 								REG_ACCn<=SIG_DATA;
 								REG_ACC_ENn<='1';	-- now write data to Rd

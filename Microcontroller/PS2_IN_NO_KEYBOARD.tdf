@@ -185,12 +185,14 @@ BEGIN
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
 					
-					
-					 if(PS2_BYTE_READY.Q == 1) then
-					 	AUT_PS2_BUS = SPB2;
-					 else
-					 	AUT_PS2_BUS = SPB1;
-					 end if;
+					 -- DEBUG
+					 --if(PS2_BYTE_READY.Q == 1) then
+					 --	AUT_PS2_BUS = SPB2;
+					 --else
+					 --	AUT_PS2_BUS = SPB1;
+					 --end if;
+					 
+					 AUT_PS2_BUS = SPB2;
 					 
 		% Check if frame data is "F0" %
 		when SPB2 => CMD_READ.D = CMD_READ.Q;
@@ -202,11 +204,14 @@ BEGIN
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
 					 
-					 if(PS2_BYTE[] == B"11110000") then
-					 	AUT_PS2_BUS = SPB3;
-					 else
-					 	AUT_PS2_BUS = SPB1;
-					 end if;
+					 -- Debug
+					 --if(PS2_BYTE[] == B"11110000") then
+					 --	AUT_PS2_BUS = SPB3;
+					 --else
+					 --	AUT_PS2_BUS = SPB1;
+					 --end if;
+					 
+					 AUT_PS2_BUS = SPB3;
 					 
 		% Wait for data frame ( after "F0" comes scancode of key ) %
 		when SPB3 => CMD_READ.D = CMD_READ.Q;
@@ -218,11 +223,14 @@ BEGIN
 					 DFF_DATA[] = DFF_DATA[];
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
 					 
-					 if(PS2_BYTE_READY.Q == 1) then
-					 	AUT_PS2_BUS = SPB4;
-					 else
-					 	AUT_PS2_BUS = SPB3;
-					 end if;
+					 --Debug
+					 --if(PS2_BYTE_READY.Q == 1) then
+					 --	AUT_PS2_BUS = SPB4;
+					 --else
+					 --	AUT_PS2_BUS = SPB3;
+					 --end if;
+					 
+					 AUT_PS2_BUS = SPB4;
 					 
 		% Write key scancode into correct buffer %
 		when SPB4 => CMD_READ.D = CMD_READ.Q;
@@ -256,8 +264,8 @@ BEGIN
 					 PS2_CNT_BYTE[] = PS2_CNT_BYTE[];
 					
 					 -- DEBUG
-					 DFF_DATA[] = S2U.U2_LS[];
-					 --DFF_DATA[] = B"00000101";
+					 --DFF_DATA[] = S2U.U2_LS[];
+					 DFF_DATA[] = B"00000101";
 					 
 					 if( CNT_DATA[] < 20 ) then
 						AUT_PS2_BUS = SPB6;
