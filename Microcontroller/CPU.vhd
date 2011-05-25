@@ -132,6 +132,9 @@ architecture CPU_module of CPU is
 	signal MUL_RES			:	std_logic_vector (7 downto 0);		-- Multiplication result
 	signal MUL_GO			: 	std_logic;							-- 0 => starts MUL operation
 	signal MUL_READY		:	std_logic;							-- 0 => MUL result ready
+	-- RegA o RegB
+	signal REG_A2			:	std_logic_vector (7 downto 0);		-- Register A2
+	signal REG_B2			:	std_logic_vector (7 downto 0);		-- Register B2
 	
 	component MUL is 
 		port (
@@ -158,6 +161,8 @@ architecture CPU_module of CPU is
 					SIG_DATA,
 					REG_A,
 					REG_B,
+					REG_A2,
+					REG_B2,
 					REG_ACCx,
 					REG_ACC,
 					ADDR_REG_ACC,
@@ -244,6 +249,8 @@ architecture CPU_module of CPU is
 								(REG_CMD(23 downto 19)="01011") then
 								AUT_CPUn<=AUT_CPU_CMD5;
 							else
+								REG_A2<=REG_A;
+								REG_B2<=REG_B;
 								AUT_CPUn<=AUT_CPU_EXE;
 							end if;
 							
@@ -339,10 +346,10 @@ architecture CPU_module of CPU is
 							elsif	REG_CMD(23 downto 19)="01001" then
 							-- bedzie problem, bo chcemy czytac naraz z trzech rejestrow
 							-- musimy spamietac na boku albo RaoRb albo Rd
-									REG_ADDRESS(15 downto 8)<=REG_A(7 downto 0);
-									REG_ADDRESS(7 downto 0)<=REG_B(7 downto 0);
+									REG_ADDRESS(15 downto 8)<=REG_A2(7 downto 0);
+									REG_ADDRESS(7 downto 0)<=REG_B2(7 downto 0);
 									
-									
+									ADDR_REG_A <= ADDR_REG_ACC; -- Rd becomes source
 							
 									AUT_CPUn<=AUT_CPU_RAM_WR3;
 									
@@ -424,8 +431,8 @@ architecture CPU_module of CPU is
 							end if;
 						
 						when AUT_CPU_RAM_WR3 =>
-							REG_ADDRESS(15 downto 8)<=REG_A(7 downto 0);
-							REG_ADDRESS(7 downto 0)<=REG_B(7 downto 0);
+							REG_ADDRESS(15 downto 8)<=REG_A2(7 downto 0);
+							REG_ADDRESS(7 downto 0)<=REG_B2(7 downto 0);
 							SIG_IS_WR<='1';
 							
 							ADDR_REG_A <= ADDR_REG_ACC;
@@ -435,8 +442,8 @@ architecture CPU_module of CPU is
 							AUT_CPUn<=AUT_CPU_RAM_WR4;
 							
 						when AUT_CPU_RAM_WR4 =>
-							REG_ADDRESS(15 downto 8)<=REG_A(7 downto 0);
-							REG_ADDRESS(7 downto 0)<=REG_B(7 downto 0);
+							REG_ADDRESS(15 downto 8)<=REG_A2(7 downto 0);
+							REG_ADDRESS(7 downto 0)<=REG_B2(7 downto 0);
 							SIG_IS_WR<='1';
 							
 							ADDR_REG_A <= ADDR_REG_ACC;
