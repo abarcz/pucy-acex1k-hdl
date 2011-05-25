@@ -19,7 +19,7 @@ use altera.altera_primitives_components.all;
 
 entity RAM is
 	generic (	base_addr	: natural := 4096;	-- adres bazowy w przestrzeni adr
-				last_addr	: natural := 4608 );-- ostatni adres w przestrzeni adr	
+				last_addr	: natural := 5119 );-- ostatni adres w przestrzeni adr	
 
 	port (	A	: in std_logic_vector (15 downto 0);
 			D	: inout std_logic_vector (7 downto 0);

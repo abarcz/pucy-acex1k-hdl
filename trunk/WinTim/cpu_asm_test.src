@@ -1,0 +1,68 @@
+TITLE	FPGA-CPU TEST PROGRAM
+LINES	50						; program length
+LIST	F, B, W					; parameters for .LST
+FORM 	11111B111B1111B1111B11111111	; format for .LST binary code output (5-3-4-4-8)
+
+;*********************************
+; MACROS
+;*********************************
+
+;*********************************
+; CONSTANTS
+;*********************************
+
+;*********************************
+; PROGRAM AREA
+;*********************************
+	ORG H#00
+START:	MOVI R0, H#01	; constant '1'
+	IN R1, H#50		; command code: 0=arithmetics, 1=SWR(Ra,Rb,Rd), 2=LWR&OUT(Ra,Rb)
+	JZ R1, ARITH		
+	SUBA R1, R1, R0	; R1 := R1 - 1
+	JZ R1, SAVE
+ 
+LOADP:	IN R0, H#50		; Ra
+	IN R1, H#50		; Rb
+	LWR R2, R0, R1	; R2 = RAM(R0.R1)
+	OUT R2, H#10	; print R2
+	JORG
+	
+SAVE:	IN R0, H#50
+	IN R1, H#50
+	IN R2, H#50		; RAM(R0.R1) = R2
+	SWR R2, R0, R1
+	OUT R2, H#10	; print R2
+	JORG
+	
+ARITH:	IN R0, H#50
+	IN R1, H#50
+	
+	ADDA R2, R0, R1
+	OUT R2, H#10
+	
+	SUBA R2, R0, R1	
+	OUT R2, H#10
+	
+	AND R2, R0, R1
+	OUT R2, H#10
+	
+	OR R2, R0, R1
+	OUT R2, H#10
+	
+	SWI R2, H#0010	; RAM(0x1000) <= R2
+	
+	MUL R2, R0, R1
+	OUT R2, H#10
+	
+	LWI R2, H#0010	; R2 <= RAM(0x1000)
+	OUT R2, H#10
+	
+	JMP H#00
+		
+
+
+;********************************
+; DATA FOR TEST PROGRAM
+;********************************
+
+END
