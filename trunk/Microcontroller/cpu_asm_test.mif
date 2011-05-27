@@ -7,12 +7,12 @@ Data_radix = HEX;
 Content
 Begin
 -- Use NOPS for default instruction memory values
-    [40..59]: 78; -- nop
+    [40..59]: 78; -- STOP
 -- Place MIPS Instructions here
 -- Note: memory addresses are in words and not bytes
 -- i.e. next location is +1 and not +4
 
--- TEST for arithmetical and logical operations => works (nop from 1A)
+-- TEST program for microcontroller
 	00: 70 01;   -- START:	MOVI R0, H#01	; constant '1'
     02: 61 50;   -- 	IN R1, H#50		; command code: 0=arithmetics, 1=SWR(Ra,Rb,Rd), 2=LWR&OUT(Ra,Rb)
     04: 09 1E;   -- 	JZ R1, ARITH		
@@ -30,7 +30,7 @@ Begin
     1B: 6A 10;   -- 	OUT R2, H#10	; print R2
     1D: 00;   -- 	JORG
 
-    00: 60 50;   -- ARITH:	IN R0, H#50
+    1E: 60 50;   -- ARITH:	IN R0, H#50
     20: 61 50;   -- 	IN R1, H#50
     22: 22 01;   -- 	ADDA R2, R0, R1
     24: 6A 10;   -- 	OUT R2, H#10
